@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>FinTrack · Diogo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>:root{--bg:#0C0C10;--s1:#141418;--s2:#1C1C23;--s3:#24242E;--b1:#2A2A36;--b2:#353545;--ac:#7C6AF5;--ac2:#5EEAD4;--tx:#EEEDF8;--su:#9B9AB8;--mu:#5A5975;--gn:#34D399;--rd:#F87171;--am:#FBBF24;--r:12px;--rsm:8px;--ff:'Inter',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--tx);font-family:var(--ff);font-size:14px;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.hdr{height:50px;background:var(--s1);border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0}
+.logo{font-size:15px;font-weight:800;letter-spacing:-.4px}.logo span{color:var(--ac)}
+.hdr-info{font-size:11px;color:var(--su);background:var(--s2);border:1px solid var(--b1);border-radius:16px;padding:3px 10px}
+.shell{display:flex;flex-direction:column;height:100vh}
+.content{flex:1;overflow:hidden;position:relative}
+.pg{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:70px;display:none}
+.pg.on{display:block}
+.mstrip{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 14px;background:var(--s1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:50}
+.mstrip::-webkit-scrollbar{display:none}
+.mp{flex-shrink:0;padding:5px 12px;border-radius:16px;border:1px solid var(--b1);background:transparent;color:var(--su);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--ff);transition:all .15s;white-space:nowrap}
+.mp.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.mp.fut{border-style:dashed;color:var(--mu)}.mp.fut.on{background:rgba(124,106,245,.2);border-color:var(--ac);border-style:dashed;color:var(--ac)}
+.w{padding:12px 14px;max-width:800px;margin:0 auto}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.chd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ct{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--su)}
+.ca{font-size:10px;color:var(--ac);cursor:pointer;font-weight:600}
+.sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu);margin:14px 0 8px;padding:0 2px}
+.kg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.kg4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.k{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px}
+.k.acc{background:rgba(124,106,245,.08);border-color:rgba(124,106,245,.28)}
+.k.amb{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.22)}
+.k.grn{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.25)}
+.kl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);margin-bottom:5px}
+.kv{font-size:20px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.ks{font-size:10px;color:var(--su);margin-top:3px}
+.sbwrap{margin-top:10px}.sbrow{display:flex;justify-content:space-between;font-size:10px;color:var(--su);margin-bottom:4px}
+.sbbg{height:8px;background:var(--s3);border-radius:4px;overflow:hidden}
+.sbfill{height:8px;border-radius:4px;transition:width .5s ease}
+.cbars{display:flex;flex-direction:column;gap:10px}
+.cb-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.cb-name{font-size:11px;color:var(--tx);display:flex;align-items:center;gap:5px}
+.cb-right{display:flex;align-items:center;gap:6px}
+.cb-val{font-size:11px;font-weight:700}.cb-pct{font-size:9px;color:var(--mu)}
+.cbbg{height:4px;background:var(--s3);border-radius:2px}
+.cbfill{height:4px;border-radius:2px;transition:width .4s}
+.lf{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.fsel,.finp{background:var(--s2);border:1px solid var(--b1);color:var(--tx);border-radius:var(--rsm);padding:7px 10px;font-size:12px;font-family:var(--ff);outline:none;-webkit-appearance:none;appearance:none}
+.fsel:focus,.finp:focus{border-color:var(--ac)}.finp{flex:2;min-width:130px}.fsel{flex:1;min-width:100px}
+.lsumm{display:flex;justify-content:space-between;align-items:baseline;padding:0 2px 8px;flex-wrap:wrap;gap:4px}
+.lcount{font-size:10px;color:var(--mu);font-weight:600}.ltot{font-size:12px;font-weight:700;color:var(--ac)}
+.ltot-minha{font-size:10px;color:var(--su);width:100%}
+.ll{display:flex;flex-direction:column;gap:4px}
+.li{background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.li.pj{border-style:dashed;opacity:.75}
+.li-ico{width:34px;height:34px;border-radius:9px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.li-body{flex:1;min-width:0}.li-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-meta{font-size:10px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-r{text-align:right;flex-shrink:0}.li-val{font-size:13px;font-weight:700}.li-sub{font-size:9px;color:var(--mu);margin-top:2px}
+.li-del{background:transparent;border:none;color:var(--mu);font-size:14px;cursor:pointer;padding:4px;flex-shrink:0;opacity:0;transition:opacity .15s}
+.li:hover .li-del{opacity:1}
+.li-sep{padding:8px 2px 3px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mu)}
+.lmore{width:100%;padding:10px;background:var(--s2);border:1px solid var(--b1);color:var(--su);border-radius:var(--r);font-family:var(--ff);font-size:12px;cursor:pointer;margin-top:8px}
+.rf{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.rcard{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px;margin-bottom:8px}
+.rcard-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.rav{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.rnm{font-size:14px;font-weight:700}.rtot{font-size:12px;font-weight:700;margin-top:1px}
+.rbar-bg{height:3px;background:var(--s3);border-radius:2px;margin-top:6px}
+.rbar-fill{height:3px;border-radius:2px}
+.rcats{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.rcpill{font-size:9px;padding:2px 7px;border-radius:4px;background:var(--s3);color:var(--su)}
+.fg{margin-bottom:10px}.fl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:5px;display:block}
+.fc{width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--b1);color:var(--tx);border-radius:var(--rsm);font-size:13px;font-family:var(--ff);outline:none;-webkit-appearance:none;appearance:none}
+.fc:focus{border-color:var(--ac);background:var(--s3)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.btnp{width:100%;padding:13px;background:var(--ac);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:700;font-family:var(--ff);cursor:pointer}
+.btnp:active{opacity:.85}
+.pp{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rsm);padding:10px;margin-bottom:10px;display:none}
+.pp-ttl{font-size:10px;color:var(--su);font-weight:600;margin-bottom:8px}
+.pp-list{display:flex;flex-wrap:wrap;gap:5px}.pp-info{margin-top:8px;font-size:10px;color:var(--mu)}
+.pp-pill{font-size:10px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;padding:3px 8px;color:var(--su);text-align:center}
+.pp-pill.first{background:rgba(124,106,245,.15);border-color:var(--ac);color:var(--ac);font-weight:700}
+.re-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.re-item{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between}
+.re-del{background:transparent;border:none;color:var(--mu);font-size:14px;cursor:pointer;padding:4px}
+.cfg-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.cfg-item{background:var(--s2);border:1px solid var(--b1);border-radius:var(--rsm);padding:8px 12px;display:flex;align-items:center;justify-content:space-between}
+.cfg-add{display:flex;gap:6px}.cfg-inp{flex:1;padding:8px 10px;background:var(--s2);border:1px solid var(--b1);color:var(--tx);border-radius:var(--rsm);font-size:12px;font-family:var(--ff);outline:none}
+.cfg-inp:focus{border-color:var(--ac)}
+.cfg-btn{padding:8px 14px;background:var(--ac);color:#fff;border:none;border-radius:var(--rsm);font-size:12px;font-weight:600;font-family:var(--ff);cursor:pointer}
+.sal-row{display:flex;gap:8px;margin-bottom:8px}
+.sal-inp{flex:1;padding:10px 12px;background:var(--s2);border:1px solid var(--b1);color:var(--tx);border-radius:var(--rsm);font-size:15px;font-weight:700;font-family:var(--ff);outline:none}
+.sal-inp:focus{border-color:var(--gn)}
+.sal-btn{padding:10px 16px;background:var(--gn);color:#0C1F17;border:none;border-radius:var(--rsm);font-size:12px;font-weight:700;font-family:var(--ff);cursor:pointer}
+.btn-rm{padding:5px 10px;border-radius:var(--rsm);border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.1);color:var(--rd);font-size:11px;font-weight:600;font-family:var(--ff);cursor:pointer}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.mbg.on{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border-radius:18px 18px 0 0;border:1px solid var(--b1);border-bottom:none;padding:18px 16px 32px;width:100%;max-width:500px;transform:translateY(100%);transition:transform .25s ease;max-height:85vh;overflow-y:auto}
+.mbg.on .modal{transform:translateY(0)}.m-ttl{font-size:15px;font-weight:700;margin-bottom:16px;text-align:center}
+.bnav{height:60px;background:var(--s1);border-top:1px solid var(--b1);display:flex;align-items:stretch;flex-shrink:0;padding:0 2px;overflow-x:auto}
+.bn{flex:1;min-width:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:var(--mu);cursor:pointer;font-family:var(--ff);transition:color .15s;border-radius:8px}
+.bn.on{color:var(--ac)}.bn-ico{font-size:17px;line-height:1}.bn-lbl{font-size:8px;font-weight:600;letter-spacing:.2px;text-transform:uppercase}
+.ch{position:relative}.h160{height:160px}.h200{height:200px}.h240{height:240px}
+.tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.3px}
+.tac{background:rgba(124,106,245,.15);color:var(--ac)}.tgn{background:rgba(52,211,153,.12);color:var(--gn)}
+.trd{background:rgba(248,113,113,.12);color:var(--rd)}.tam{background:rgba(251,191,36,.12);color:var(--am)}
+.tfut{background:rgba(124,106,245,.06);color:var(--mu);border:1px dashed var(--b1)}
+.green{color:var(--gn)}.red{color:var(--rd)}
+.empty{text-align:center;padding:24px 16px;color:var(--mu);font-size:13px}
+.btn-sm-inv{flex:1;padding:8px;border-radius:8px;border:1px solid var(--b1);background:var(--s2);color:var(--su);font-size:10.5px;font-weight:600;font-family:var(--ff);cursor:pointer}
+.btn-sm-inv.resgate{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.08);color:var(--am)}
+.inv-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.inv-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.inv-banco{font-size:14px;font-weight:700}
+.inv-tipo-tag{font-size:10px;color:var(--su);margin-top:2px}
+.inv-valor-atual{font-size:17px;font-weight:800}
+.inv-pct{font-size:11px;font-weight:700;margin-top:2px}
+.inv-desc{font-size:11px;color:var(--su);margin-bottom:8px}
+.inv-meta-row{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--su);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--b1)}
+.inv-actions{display:flex;gap:6px}
+.inv-hist{margin-top:10px;padding-top:10px;border-top:1px solid var(--b1)}
+.summ-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+@media(min-width:600px){.kg4{grid-template-columns:repeat(4,1fr)}.fg2{grid-template-columns:repeat(3,1fr)}.summ-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="hdr">
+    <div class="logo">fin<span>track</span></div>
+    <div class="hdr-info" id="hdr-info">—</div>
+  </header>
+  <div class="content">
+
+<!-- ████ DASHBOARD (mensal) ████ -->
+<div id="pg-dash" class="pg on">
+  <div class="mstrip" id="ms-dash"></div>
+  <div class="w">
+    <div class="sec">Saldo — <span id="d-mesnome"></span></div>
+    <div class="card" id="saldo-card">
+      <div class="kg2">
+        <div><div class="kl">Renda Total</div><div class="kv green" id="d-renda">—</div><div class="ks">salário + extras</div></div>
+        <div><div class="kl" id="d-glbl">Meus Gastos</div><div class="kv red" id="d-gastos">—</div><div class="ks" id="d-gastos-s">—</div></div>
+      </div>
+      <div style="margin-top:10px"><div class="kl">Saldo Disponível</div>
+        <div class="kv green" id="d-saldo" style="font-size:30px;margin-top:4px">—</div></div>
+      <div class="sbwrap">
+        <div class="sbrow"><span id="sb-lbl">Comprometido</span><span id="sb-pct">—</span></div>
+        <div class="sbbg"><div class="sbfill" id="sbfill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><span class="ct">Renda Extra deste Mês</span><span class="ca" onclick="openRendaModal()">+ Adicionar</span></div>
+      <div id="re-list"></div>
+      <div id="re-empty" class="empty" style="padding:10px;font-size:11px">Nenhuma renda extra neste mês</div>
+    </div>
+
+    <div class="sec">Resumo do Mês</div>
+    <div class="kg4">
+      <div class="k acc"><div class="kl">Categorias</div><div class="kv" id="d-ncats">—</div><div class="ks">com gasto</div></div>
+      <div class="k amb"><div class="kl">Maior Gasto</div><div class="kv" id="d-topcat-val">—</div><div class="ks" id="d-topcat-nome">—</div></div>
+      <div class="k"><div class="kl">Lançamentos</div><div class="kv" id="d-nlanc">—</div><div class="ks">no mês</div></div>
+      <div class="k"><div class="kl">vs Mês Anterior</div><div class="kv" id="d-var">—</div><div class="ks" id="d-var-sub">—</div></div>
+    </div>
+    <div class="card" style="background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.2)">
+      <div class="chd"><span class="ct">A Receber Neste Mês</span><span class="ca" onclick="navTo('reimb')">Ver detalhes</span></div>
+      <div class="kv green" id="d-areceber-mes" style="font-size:24px">—</div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><span class="ct">Gastos Acumulados no Mês</span></div>
+      <div class="ch h160"><canvas id="ch-diario"></canvas></div>
+      <div class="empty" id="ch-diario-empty" style="display:none;padding:20px">Nenhum lançamento ainda neste mês</div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><span class="ct">Top Categorias do Mês</span><span class="ca" onclick="navTo('lanc')">Ver lançamentos</span></div>
+      <div class="cbars" id="d-topcats"></div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><span class="ct">Por Cartão</span></div>
+      <div class="ch h160"><canvas id="ch-cartao"></canvas></div>
+      <div class="empty" id="ch-cartao-empty" style="display:none;padding:20px">Nenhum gasto neste mês</div>
+    </div>
+
+    <div class="sec">Histórico (clique numa barra para navegar)</div>
+    <div class="card">
+      <div class="ch h160"><canvas id="ch-historico"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ LANÇAMENTOS ████ -->
+<div id="pg-lanc" class="pg">
+  <div class="w" style="padding-top:12px">
+    <div class="lf">
+      <input class="finp" id="l-q" placeholder="🔍 Buscar…" oninput="rLanc()">
+      <select class="fsel" id="l-mes" onchange="rLanc()"><option value="">Todos meses</option></select>
+      <select class="fsel" id="l-cat" onchange="rLanc()"><option value="">Todas categorias</option></select>
+      <select class="fsel" id="l-resp" onchange="rLanc()"><option value="">Todos responsáveis</option></select>
+      <select class="fsel" id="l-cartao" onchange="rLanc()"><option value="">Todos cartões</option></select>
+      <select class="fsel" id="l-tipo" onchange="rLanc()">
+        <option value="">Reais + Projeção</option>
+        <option value="real">Só Reais</option>
+        <option value="proj">Só Projeção</option>
+      </select>
+    </div>
+    <div class="lsumm">
+      <span class="lcount" id="l-cnt">—</span>
+      <span class="ltot" id="l-tot">—</span>
+      <span class="ltot-minha" id="l-tot-minha">—</span>
+    </div>
+    <div class="ll" id="l-list"></div>
+    <button class="lmore" id="l-more" onclick="lMore()" style="display:none">Carregar mais</button>
+  </div>
+</div>
+
+<!-- ████ RESPONSÁVEIS ████ -->
+<div id="pg-resp" class="pg">
+  <div class="mstrip" id="ms-resp"></div>
+  <div class="w">
+    <div class="rf">
+      <select class="fsel" id="r-cat" onchange="rResp()" style="flex:1"><option value="">Todas categorias</option></select>
+      <select class="fsel" id="r-cartao" onchange="rResp()" style="flex:1"><option value="">Todos cartões</option></select>
+    </div>
+    <div class="card">
+      <div class="chd"><span class="ct">Distribuição do Mês</span></div>
+      <div class="ch h200"><canvas id="ch-rpizza"></canvas></div>
+      <div class="empty" id="ch-rpizza-empty" style="display:none;padding:20px">Nenhum gasto neste mês</div>
+    </div>
+    <div class="sec">Detalhe por Pessoa</div>
+    <div id="r-cards"></div>
+  </div>
+</div>
+
+<!-- ████ REEMBOLSOS (mês a mês) ████ -->
+<div id="pg-reimb" class="pg">
+  <div class="mstrip" id="ms-reimb"></div>
+  <div class="w">
+    <div class="sec">Reembolsos — <span id="reimb-mesnome"></span></div>
+    <div class="kg2">
+      <div class="k grn"><div class="kl">A Receber em <span id="reimb-mes-label-curto"></span></div><div class="kv green" id="reimb-total-mes">—</div></div>
+      <div class="k"><div class="kl">Total Geral Pendente</div><div class="kv" id="reimb-total-geral">—</div></div>
+    </div>
+    <div id="reimb-cards"></div>
+
+    <div class="sec">Recebido Neste Mês</div>
+    <div id="reimb-hist"></div>
+
+    <div class="sec">Consolidado — Quem Mais Deve (todos os meses)</div>
+    <div class="card">
+      <div class="ch h160"><canvas id="ch-reimb-geral"></canvas></div>
+      <div class="empty" id="ch-reimb-geral-empty" style="display:none;padding:20px">Nenhum reembolso pendente 🎉</div>
+    </div>
+  </div>
+</div>
+
+<!-- ████ INVESTIMENTOS ████ -->
+<div id="pg-inv" class="pg">
+  <div class="w">
+    <div class="sec">Resumo dos Investimentos</div>
+    <div class="card" style="background:linear-gradient(135deg,rgba(124,106,245,.1),var(--s1));border-color:rgba(124,106,245,.3)">
+      <div class="kl">Valor Total Investido (ativo)</div>
+      <div class="kv" id="inv-total-atual" style="font-size:28px;margin-top:4px">—</div>
+      <div class="summ-grid" style="margin-top:12px">
+        <div>
+          <div class="kl">Aplicado</div>
+          <div class="kv" id="inv-total-aplicado" style="font-size:15px">—</div>
+        </div>
+        <div>
+          <div class="kl">Rendimento</div>
+          <div class="kv green" id="inv-total-rendimento" style="font-size:15px">—</div>
+        </div>
+        <div>
+          <div class="kl">Rentab. Média</div>
+          <div class="kv" id="inv-rentab-media" style="font-size:15px">—</div>
+        </div>
+        <div>
+          <div class="kl">Ativos</div>
+          <div class="kv" id="inv-qtd-ativos" style="font-size:15px">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><span class="ct">Distribuição por Tipo</span></div>
+      <div class="ch h200"><canvas id="ch-inv-tipo"></canvas></div>
+      <div class="empty" id="ch-inv-tipo-empty" style="display:none;padding:20px">Nenhum investimento ainda</div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><span class="ct">Distribuição por Banco</span></div>
+      <div class="ch h160"><canvas id="ch-inv-banco"></canvas></div>
+      <div class="empty" id="ch-inv-banco-empty" style="display:none;padding:20px">Nenhum investimento ainda</div>
+    </div>
+
+    <div class="card">
+      <div class="chd"><span class="ct">Evolução do Rendimento</span></div>
+      <div class="ch h160"><canvas id="ch-inv-evolucao"></canvas></div>
+      <div class="empty" id="ch-inv-evolucao-empty" style="display:none;padding:20px">Lance rendimentos para ver a evolução</div>
+    </div>
+
+    <div class="sec">Novo Investimento</div>
+    <div class="card">
+      <div class="fg"><label class="fl">Descrição</label>
+        <input class="fc" id="inv-desc" placeholder="Ex: Reserva de emergência"></div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Banco *</label><select class="fc" id="inv-banco"></select></div>
+        <div class="fg"><label class="fl">Tipo *</label><select class="fc" id="inv-tipo"></select></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Valor Aplicado (R$) *</label>
+          <input class="fc" id="inv-valor" type="number" step="0.01" placeholder="0,00" inputmode="decimal"></div>
+        <div class="fg"><label class="fl">Data Aplicação *</label><input class="fc" id="inv-data" type="date"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Taxa Contratada</label>
+          <input class="fc" id="inv-taxa" placeholder="Ex: 110% CDI, IPCA+6%"></div>
+        <div class="fg"><label class="fl">Vencimento</label><input class="fc" id="inv-vencimento" type="date"></div>
+      </div>
+      <button class="btnp" onclick="salvarInvestimento()">✓ Registrar Investimento</button>
+    </div>
+
+    <div class="sec">Investimentos Ativos</div>
+    <div id="inv-list"></div>
+
+    <div class="sec">Resgatados</div>
+    <div class="card">
+      <div class="kg2">
+        <div><div class="kl">Total Resgatado</div><div class="kv" id="inv-total-resgatado" style="font-size:16px">—</div></div>
+        <div><div class="kl">Lucro Realizado</div><div class="kv green" id="inv-lucro-resgatado" style="font-size:16px">—</div></div>
+      </div>
+    </div>
+    <div id="inv-resgatados"></div>
+  </div>
+</div>
+
+<!-- ████ NOVO LANÇAMENTO ████ -->
+<div id="pg-novo" class="pg">
+  <div class="w">
+    <div class="sec">Registrar Despesa</div>
+    <div class="card">
+      <div class="fg"><label class="fl">Descrição *</label>
+        <input class="fc" id="n-desc" placeholder="Ex: Supermercado, Netflix, Academia…" autocomplete="off"></div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Data *</label><input class="fc" id="n-data" type="date"></div>
+        <div class="fg"><label class="fl">Valor Total (R$) *</label>
+          <input class="fc" id="n-valor" type="number" step="0.01" min="0" placeholder="0,00" inputmode="decimal" oninput="updParc()"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Categoria *</label><select class="fc" id="n-cat"></select></div>
+        <div class="fg"><label class="fl">Responsável *</label><select class="fc" id="n-resp"></select></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Forma Pagamento</label><select class="fc" id="n-pgto" onchange="syncCartao()"></select></div>
+        <div class="fg"><label class="fl">Cartão</label><select class="fc" id="n-cartao"></select></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="fl">Total de Parcelas</label>
+          <input class="fc" id="n-nparc" type="number" value="1" min="1" max="60" inputmode="numeric" oninput="updParc()"></div>
+        <div class="fg"><label class="fl">Mês da 1ª Parcela</label><select class="fc" id="n-mesini" onchange="updParc()"></select></div>
+      </div>
+      <div class="pp" id="pp">
+        <div class="pp-ttl">📅 Parcelas que serão criadas:</div>
+        <div class="pp-list" id="pp-list"></div>
+        <div class="pp-info" id="pp-info"></div>
+      </div>
+      <button class="btnp" onclick="salvar()">✓ Registrar</button>
+    </div>
+    <div class="sec">Últimos Registros</div>
+    <div id="n-rec"></div>
+  </div>
+</div>
+
+<!-- ████ CONFIG ████ -->
+<div id="pg-cfg" class="pg">
+  <div class="w">
+    <div class="sec">Salário Base</div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:2px">Salário Mensal Fixo</div>
+      <div style="font-size:11px;color:var(--su);margin-bottom:10px">Base para cálculo do saldo disponível</div>
+      <div class="sal-row">
+        <input class="sal-inp" id="cfg-sal" type="number" step="100" placeholder="15000">
+        <button class="sal-btn" onclick="saveSal()">Salvar</button>
+      </div>
+      <div class="ks" id="cfg-sal-lbl">—</div>
+    </div>
+    <div class="sec">Categorias</div>
+    <div class="card"><div class="cfg-list" id="cl-cats"></div>
+      <div class="cfg-add"><input class="cfg-inp" id="ni-cats" placeholder="Nova categoria…" onkeydown="if(event.key==='Enter')addCfg('cats')">
+      <button class="cfg-btn" onclick="addCfg('cats')">+</button></div></div>
+    <div class="sec">Responsáveis</div>
+    <div class="card"><div class="cfg-list" id="cl-resps"></div>
+      <div class="cfg-add"><input class="cfg-inp" id="ni-resps" placeholder="Novo responsável…" onkeydown="if(event.key==='Enter')addCfg('resps')">
+      <button class="cfg-btn" onclick="addCfg('resps')">+</button></div></div>
+    <div class="sec">Cartões</div>
+    <div class="card"><div class="cfg-list" id="cl-cartoes"></div>
+      <div class="cfg-add"><input class="cfg-inp" id="ni-cartoes" placeholder="Novo cartão…" onkeydown="if(event.key==='Enter')addCfg('cartoes')">
+      <button class="cfg-btn" onclick="addCfg('cartoes')">+</button></div></div>
+    <div class="sec">Formas de Pagamento</div>
+    <div class="card"><div class="cfg-list" id="cl-pgtos"></div>
+      <div class="cfg-add"><input class="cfg-inp" id="ni-pgtos" placeholder="Nova forma…" onkeydown="if(event.key==='Enter')addCfg('pgtos')">
+      <button class="cfg-btn" onclick="addCfg('pgtos')">+</button></div></div>
+    <div class="sec">Bancos (Investimentos)</div>
+    <div class="card"><div class="cfg-list" id="cl-bancos"></div>
+      <div class="cfg-add"><input class="cfg-inp" id="ni-bancos" placeholder="Novo banco…" onkeydown="if(event.key==='Enter')addCfg('bancos')">
+      <button class="cfg-btn" onclick="addCfg('bancos')">+</button></div></div>
+    <div class="sec">Tipos de Investimento</div>
+    <div class="card"><div class="cfg-list" id="cl-tiposInv"></div>
+      <div class="cfg-add"><input class="cfg-inp" id="ni-tiposInv" placeholder="Novo tipo…" onkeydown="if(event.key==='Enter')addCfg('tiposInv')">
+      <button class="cfg-btn" onclick="addCfg('tiposInv')">+</button></div></div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+  </div><!-- /content -->
+  <nav class="bnav">
+    <button class="bn on" id="bn-dash" onclick="navTo('dash')"><span class="bn-ico">📊</span><span class="bn-lbl">Início</span></button>
+    <button class="bn" id="bn-lanc" onclick="navTo('lanc')"><span class="bn-ico">📋</span><span class="bn-lbl">Lanç.</span></button>
+    <button class="bn" id="bn-resp" onclick="navTo('resp')"><span class="bn-ico">👥</span><span class="bn-lbl">Resp.</span></button>
+    <button class="bn" id="bn-reimb" onclick="navTo('reimb')"><span class="bn-ico">💰</span><span class="bn-lbl">Reemb.</span></button>
+    <button class="bn" id="bn-inv" onclick="navTo('inv')"><span class="bn-ico">📈</span><span class="bn-lbl">Invest.</span></button>
+    <button class="bn" id="bn-novo" onclick="navTo('novo')"><span class="bn-ico">➕</span><span class="bn-lbl">Novo</span></button>
+    <button class="bn" id="bn-cfg" onclick="navTo('cfg')"><span class="bn-ico">⚙️</span><span class="bn-lbl">Config</span></button>
+  </nav>
+</div>
+
+<!-- MODAL RENDA EXTRA -->
+<div class="mbg" id="m-renda" onclick="if(event.target===this)closeRendaModal()">
+  <div class="modal">
+    <div class="m-ttl">Renda Extra</div>
+    <div class="fg"><label class="fl">Descrição</label><input class="fc" id="re-desc" placeholder="Freelance, Bônus, Venda…"></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Valor (R$)</label><input class="fc" id="re-val" type="number" step="0.01" placeholder="0,00" inputmode="decimal"></div>
+      <div class="fg"><label class="fl">Mês</label><select class="fc" id="re-mes"></select></div>
+    </div>
+    <button class="btnp" onclick="salvarRendaExtra()">Adicionar</button>
+  </div>
+</div>
+
+<!-- MODAL RENDIMENTO -->
+<div class="mbg" id="m-rend" onclick="if(event.target===this)closeRendModal()">
+  <div class="modal">
+    <div class="m-ttl">Lançar Rendimento</div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Valor (R$)</label><input class="fc" id="rend-valor" type="number" step="0.01" placeholder="0,00" inputmode="decimal"></div>
+      <div class="fg"><label class="fl">Data</label><input class="fc" id="rend-data" type="date"></div>
+    </div>
+    <button class="btnp" onclick="salvarRendimento()">Lançar</button>
+  </div>
+</div>
+
+<!-- MODAL RESGATE -->
+<div class="mbg" id="m-resgate" onclick="if(event.target===this)closeResgateModal()">
+  <div class="modal">
+    <div class="m-ttl">Confirmar Resgate</div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Valor Resgatado (R$)</label><input class="fc" id="resgate-valor" type="number" step="0.01" inputmode="decimal"></div>
+      <div class="fg"><label class="fl">Data</label><input class="fc" id="resgate-data" type="date"></div>
+    </div>
+    <button class="btnp" onclick="confirmarResgate()">Confirmar Resgate</button>
+  </div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:var(--s3);border:1px solid var(--b2);color:var(--tx);padding:10px 18px;
+  border-radius:20px;font-size:13px;font-weight:500;z-index:500;
+  transition:transform .25s,opacity .25s;opacity:0;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center"></div>
+
+<script>
+const BASE_DATA = [{"id":"2918c6f7e2","mes":"Ago/26","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"74141c8277","mes":"Set/26","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"ce5bfee717","mes":"Out/26","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"79dba5f47","mes":"Nov/26","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"4bba46f895","mes":"Dez/26","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"22cff47db3","mes":"Jan/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"5f261703dd","mes":"Fev/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"86ad6d772c","mes":"Mar/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"21d0999559","mes":"Abr/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"c7893809fe","mes":"Mai/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"13/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"ae3513f474","mes":"Jun/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"14/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"8ae2e0c48f","mes":"Jul/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"15/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"1bbdd30d47","mes":"Ago/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"16/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"2138cb6ab9","mes":"Set/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"17/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"38f7c5a8d7","mes":"Out/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"18/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"127498e0c0","mes":"Nov/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"19/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"72f951f9e7","mes":"Dez/27","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"20/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"5496b94214","mes":"Jan/28","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"21/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"c58c6b954f","mes":"Fev/28","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"22/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"87aaccbb43","mes":"Mar/28","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"23/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"bfb489e8b","mes":"Abr/28","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"24/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"b2961e3acf","mes":"Mai/28","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"25/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"6d1be3258a","mes":"Jun/28","data":"2026-08-01","desc":"Financiamento carro","cat":"Despesas Veículo","val":2261.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"26/48","proj":true,"grupoId":"4694dcbd3f"},{"id":"dde6b108a1","mes":"Ago/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"f5054fbda2"},{"id":"aca073b3a0","mes":"Set/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"f5054fbda2"},{"id":"8c85965ca7","mes":"Out/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"f5054fbda2"},{"id":"148e39e829","mes":"Nov/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"f5054fbda2"},{"id":"ad1598b727","mes":"Dez/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"f5054fbda2"},{"id":"8daed78c9e","mes":"Jan/27","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"f5054fbda2"},{"id":"cc38cd6b8c","mes":"Fev/27","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"f5054fbda2"},{"id":"6e70110bbc","mes":"Mar/27","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"f5054fbda2"},{"id":"99a8ab91e4","mes":"Abr/27","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"f5054fbda2"},{"id":"d4230cdd49","mes":"Mai/27","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"f5054fbda2"},{"id":"50c6202e75","mes":"Jun/27","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.68,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"f5054fbda2"},{"id":"5191c4b36b","mes":"Ago/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"133a3103df"},{"id":"d9802e895d","mes":"Set/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"133a3103df"},{"id":"59f4f291c9","mes":"Out/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"133a3103df"},{"id":"cc5f45100d","mes":"Nov/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"133a3103df"},{"id":"a4d747084f","mes":"Dez/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"133a3103df"},{"id":"f04004afe9","mes":"Jan/27","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"133a3103df"},{"id":"7b8b2eb0f0","mes":"Fev/27","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"133a3103df"},{"id":"29a31613c6","mes":"Mar/27","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"133a3103df"},{"id":"609fda1548","mes":"Abr/27","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"133a3103df"},{"id":"bf53ae5d73","mes":"Mai/27","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"133a3103df"},{"id":"def085f117","mes":"Jun/27","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":142.84,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"133a3103df"},{"id":"4a3af4e59d","mes":"Ago/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"6fe4be0f21","mes":"Set/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"e788865b70","mes":"Out/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"8aae9b7b57","mes":"Nov/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"8b66ff3dbf","mes":"Dez/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"4d27402678","mes":"Jan/27","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"8f42d44a33","mes":"Fev/27","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"b1335fa4c2","mes":"Mar/27","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"36a4b5d0a0","mes":"Abr/27","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"ebf6285f65","mes":"Mai/27","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"347bc0b609","mes":"Jun/27","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":175.61,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"b70dc7e9e1"},{"id":"3ff3b15d54","mes":"Ago/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"d807b7e418"},{"id":"836a963302","mes":"Set/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"d807b7e418"},{"id":"d848b2c079","mes":"Out/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"d807b7e418"},{"id":"503dc1f962","mes":"Nov/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"d807b7e418"},{"id":"1bffda233c","mes":"Dez/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"d807b7e418"},{"id":"4d12f5f0ca","mes":"Jan/27","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"d807b7e418"},{"id":"12df0c7136","mes":"Fev/27","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"d807b7e418"},{"id":"b7e7442770","mes":"Mar/27","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"d807b7e418"},{"id":"90451a29b5","mes":"Abr/27","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"d807b7e418"},{"id":"7db2b86ae3","mes":"Mai/27","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"d807b7e418"},{"id":"24c8097eb4","mes":"Jun/27","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":40.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"d807b7e418"},{"id":"ce4d438d23","mes":"Ago/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"ddfc63b517"},{"id":"9323ff01b7","mes":"Set/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"ddfc63b517"},{"id":"af62d01110","mes":"Out/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"ddfc63b517"},{"id":"7fb4a0f9","mes":"Nov/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"ddfc63b517"},{"id":"88fdc7d562","mes":"Dez/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"ddfc63b517"},{"id":"8a9b8b0aa0","mes":"Jan/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"ddfc63b517"},{"id":"44714efcfe","mes":"Fev/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"ddfc63b517"},{"id":"7256d9f706","mes":"Mar/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"ddfc63b517"},{"id":"b99d64adf","mes":"Abr/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"ddfc63b517"},{"id":"92a980ee64","mes":"Mai/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"ddfc63b517"},{"id":"191dd28cc8","mes":"Jun/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":159.99,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"ddfc63b517"},{"id":"6f3638966d","mes":"Ago/26","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"adce9101f"},{"id":"80be991762","mes":"Set/26","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"adce9101f"},{"id":"8881f4604b","mes":"Out/26","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"adce9101f"},{"id":"ae39474d85","mes":"Nov/26","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"adce9101f"},{"id":"1d0bf89697","mes":"Dez/26","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"adce9101f"},{"id":"62640cb424","mes":"Jan/27","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"adce9101f"},{"id":"6f593dfc95","mes":"Fev/27","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"adce9101f"},{"id":"2993bb61dd","mes":"Mar/27","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"adce9101f"},{"id":"12bd17e146","mes":"Abr/27","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"adce9101f"},{"id":"16adc1254f","mes":"Mai/27","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"adce9101f"},{"id":"6fc0d7362d","mes":"Jun/27","data":"2026-08-01","desc":"Prestação Casa","cat":"Moradia","val":684.53,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"adce9101f"},{"id":"c0aa1045a4","mes":"Ago/26","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"a96ad95b8a","mes":"Set/26","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"6c6becca70","mes":"Out/26","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"a7db7c08b","mes":"Nov/26","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"e8817143c4","mes":"Dez/26","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"231f6cb6c9","mes":"Jan/27","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"5736f81c33","mes":"Fev/27","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"71c334567","mes":"Mar/27","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"dffebc58be","mes":"Abr/27","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"53763811b2","mes":"Mai/27","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"6598f46d15","mes":"Jun/27","data":"2026-08-01","desc":"Prestação Casa (Adiantamento)","cat":"Moradia","val":350.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"74e16aa8a7"},{"id":"d9f2403130","mes":"Ago/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"2/12","proj":true,"grupoId":"6f06e640b8"},{"id":"5bce1aee63","mes":"Set/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"3/12","proj":true,"grupoId":"6f06e640b8"},{"id":"a0f1030d8c","mes":"Out/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"6f06e640b8"},{"id":"fec27495e6","mes":"Nov/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"6f06e640b8"},{"id":"e6f7394dda","mes":"Dez/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"6f06e640b8"},{"id":"e03b0d8cf2","mes":"Jan/27","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"6f06e640b8"},{"id":"e00f46c5f1","mes":"Fev/27","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"6f06e640b8"},{"id":"f914418068","mes":"Mar/27","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"6f06e640b8"},{"id":"6be0ab94f3","mes":"Abr/27","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"6f06e640b8"},{"id":"44359b43d3","mes":"Mai/27","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"6f06e640b8"},{"id":"304fb2a865","mes":"Jun/27","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":19.9,"resp":"Diogo","pgto":"Pix","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"6f06e640b8"},{"id":"e56a0a0100","mes":"Ago/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"b4ee685adb","mes":"Set/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"3/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"8316b6350a","mes":"Out/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"faebf30e8a","mes":"Nov/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"38eb287c4","mes":"Dez/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"b80b7e7fe8","mes":"Jan/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"c0420956af","mes":"Fev/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"c4f550d6c0","mes":"Mar/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"94ffb1f0d5","mes":"Abr/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"811e3c0b3f","mes":"Mai/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"1a18741a95","mes":"Jun/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":128.86,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"76b0b0c3b6"},{"id":"e11f496629","mes":"Ago/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"1b365a31cb"},{"id":"97ddb759f","mes":"Set/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"1b365a31cb"},{"id":"fe9d3eb0c9","mes":"Out/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"1b365a31cb"},{"id":"c63c366449","mes":"Nov/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"1b365a31cb"},{"id":"61d7671589","mes":"Dez/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"1b365a31cb"},{"id":"8725ed8b0b","mes":"Jan/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"1b365a31cb"},{"id":"2ae66d824c","mes":"Fev/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"1b365a31cb"},{"id":"aa225e06d7","mes":"Mar/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"1b365a31cb"},{"id":"cbda6c783","mes":"Abr/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"1b365a31cb"},{"id":"20e7e07ec2","mes":"Mai/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"1b365a31cb"},{"id":"b217e62cf2","mes":"Jun/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":971.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"1b365a31cb"},{"id":"9cb2f52d15","mes":"Ago/26","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"81251f3a6","mes":"Set/26","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"a603e104e6","mes":"Out/26","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"bb37c84012","mes":"Nov/26","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"cb1a935a78","mes":"Dez/26","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"e7962f5d83","mes":"Jan/27","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"7ea678b640","mes":"Fev/27","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"c6a902f463","mes":"Mar/27","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"cde4c9dda6","mes":"Abr/27","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"389b1f54a1","mes":"Mai/27","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"ae0d5ca07c","mes":"Jun/27","data":"2026-08-01","desc":"Elaine (faxina)","cat":"Moradia","val":200.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"4c91d1a6de"},{"id":"ebac2a31f","mes":"Ago/26","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"d29f9c1561","mes":"Set/26","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"f1985a8034","mes":"Out/26","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"cc917c3d1a","mes":"Nov/26","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"54d5dcdcce","mes":"Dez/26","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"8682c30522","mes":"Jan/27","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"88ede81c55","mes":"Fev/27","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"22ad996016","mes":"Mar/27","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"36c054e72c","mes":"Abr/27","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"cc8e3a916","mes":"Mai/27","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"34345c7329","mes":"Jun/27","data":"2026-08-01","desc":"Ifood","cat":"Alimentação","val":5.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"e6d812eb3f"},{"id":"947068e0c","mes":"Ago/26","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/12","proj":true,"grupoId":"5f197cbdda"},{"id":"67705524c","mes":"Set/26","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/12","proj":true,"grupoId":"5f197cbdda"},{"id":"fd8a0d9e4d","mes":"Out/26","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"5f197cbdda"},{"id":"e5f9898bf5","mes":"Nov/26","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"5f197cbdda"},{"id":"759fe6e88e","mes":"Dez/26","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"5f197cbdda"},{"id":"456114136e","mes":"Jan/27","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"5f197cbdda"},{"id":"772263d87d","mes":"Fev/27","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"5f197cbdda"},{"id":"5850dece74","mes":"Mar/27","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"5f197cbdda"},{"id":"b9e9fe3452","mes":"Abr/27","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"5f197cbdda"},{"id":"35aa2f9a22","mes":"Mai/27","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"5f197cbdda"},{"id":"a5b2501a37","mes":"Jun/27","data":"2026-08-01","desc":"Apple.com (youtube)","cat":"Assinaturas","val":34.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"5f197cbdda"},{"id":"37568613ff","mes":"Ago/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"2/12","proj":true,"grupoId":"212d91b77e"},{"id":"49364447b6","mes":"Set/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"3/12","proj":true,"grupoId":"212d91b77e"},{"id":"5622a38952","mes":"Out/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"4/12","proj":true,"grupoId":"212d91b77e"},{"id":"fc7d3f028a","mes":"Nov/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"5/12","proj":true,"grupoId":"212d91b77e"},{"id":"fb4ff13932","mes":"Dez/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"6/12","proj":true,"grupoId":"212d91b77e"},{"id":"f8bf0bfc13","mes":"Jan/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"7/12","proj":true,"grupoId":"212d91b77e"},{"id":"cd56e028fc","mes":"Fev/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"8/12","proj":true,"grupoId":"212d91b77e"},{"id":"86b76d2cf3","mes":"Mar/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"9/12","proj":true,"grupoId":"212d91b77e"},{"id":"e62a815d2c","mes":"Abr/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"10/12","proj":true,"grupoId":"212d91b77e"},{"id":"d4da25b7eb","mes":"Mai/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"11/12","proj":true,"grupoId":"212d91b77e"},{"id":"1e664363a9","mes":"Jun/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":139.9,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"12/12","proj":true,"grupoId":"212d91b77e"},{"id":"77a4cb3b6c","mes":"Ago/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"375bcb5ff8","mes":"Set/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"20da73d576","mes":"Out/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"81e352f53c","mes":"Nov/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"a0a43e2fa1","mes":"Dez/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"fb7743bbf9","mes":"Jan/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"54e0cda7bc","mes":"Fev/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"11f2bc3661","mes":"Mar/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"e25d074d08","mes":"Abr/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"c0158faacb","mes":"Mai/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"218b47ee1f","mes":"Jun/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.23,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"87fcd06a6c"},{"id":"ccf816759e","mes":"Ago/26","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"2/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"47b0767359","mes":"Set/26","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"3/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"91fc06de9f","mes":"Out/26","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"4/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"361653a744","mes":"Nov/26","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"5/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"d87cba81c7","mes":"Dez/26","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"6/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"7b08c5cf0c","mes":"Jan/27","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"7/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"abb2b3db5c","mes":"Fev/27","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"8/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"6b991608ca","mes":"Mar/27","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"9/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"b962ae09c6","mes":"Abr/27","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"10/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"c4039a2e9a","mes":"Mai/27","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"11/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"44661bb743","mes":"Jun/27","data":"2026-08-01","desc":"Master Park","cat":"Estacionamento Serviço","val":220.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"12/12","proj":true,"grupoId":"7c5f1ca673"},{"id":"f02d31a4ca","mes":"Ago/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"3/12","proj":true,"grupoId":"fbc38fa873"},{"id":"ec3c16da1d","mes":"Set/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"fbc38fa873"},{"id":"8af46654f9","mes":"Out/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"fbc38fa873"},{"id":"702a640a03","mes":"Nov/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"fbc38fa873"},{"id":"6c5f2027b5","mes":"Dez/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"fbc38fa873"},{"id":"6b6a469fbc","mes":"Jan/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"fbc38fa873"},{"id":"77c22efdd","mes":"Fev/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"fbc38fa873"},{"id":"2f8def1adb","mes":"Mar/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"fbc38fa873"},{"id":"644d7569d","mes":"Abr/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"fbc38fa873"},{"id":"4b8e3048d2","mes":"Mai/27","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":224.9,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"fbc38fa873"},{"id":"3884240d","mes":"Ago/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/12","proj":true,"grupoId":"b687f395c8"},{"id":"7e355854c5","mes":"Set/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"b687f395c8"},{"id":"333d0c2f28","mes":"Out/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"b687f395c8"},{"id":"58692c8cf0","mes":"Nov/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"b687f395c8"},{"id":"dc7ce38bed","mes":"Dez/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"b687f395c8"},{"id":"8b91d1ab6a","mes":"Jan/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"b687f395c8"},{"id":"ec2284b0b7","mes":"Fev/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"b687f395c8"},{"id":"ee55161613","mes":"Mar/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"b687f395c8"},{"id":"8e9e459333","mes":"Abr/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"b687f395c8"},{"id":"ce9243155c","mes":"Mai/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":108.14,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"b687f395c8"},{"id":"1456320e76","mes":"Ago/26","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/12","proj":true,"grupoId":"5238fbe298"},{"id":"e5e92f1c2d","mes":"Set/26","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"5238fbe298"},{"id":"b4380550ab","mes":"Out/26","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"5238fbe298"},{"id":"1323b89375","mes":"Nov/26","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"5238fbe298"},{"id":"4dce9bd8b","mes":"Dez/26","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"5238fbe298"},{"id":"9e230ba301","mes":"Jan/27","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"5238fbe298"},{"id":"7a509c885","mes":"Fev/27","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"5238fbe298"},{"id":"105da3d658","mes":"Mar/27","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"5238fbe298"},{"id":"4965b4847c","mes":"Abr/27","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"5238fbe298"},{"id":"8c305d62c8","mes":"Mai/27","data":"2026-08-01","desc":"Google","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"5238fbe298"},{"id":"bab2a9b3bb","mes":"Ago/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"83f4395e0e"},{"id":"49607bab31","mes":"Set/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"83f4395e0e"},{"id":"1d98bd18c1","mes":"Out/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"83f4395e0e"},{"id":"bf6864694d","mes":"Nov/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"83f4395e0e"},{"id":"8bc7ace06a","mes":"Dez/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"83f4395e0e"},{"id":"236713e425","mes":"Jan/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"83f4395e0e"},{"id":"8fabb9b5fd","mes":"Fev/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"83f4395e0e"},{"id":"6556cfc00a","mes":"Mar/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"83f4395e0e"},{"id":"9d81ef0ec9","mes":"Abr/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":182.05,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"83f4395e0e"},{"id":"68d73ea7d9","mes":"Ago/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"4/12","proj":true,"grupoId":"5773d31f92"},{"id":"92c2140a41","mes":"Set/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"5/12","proj":true,"grupoId":"5773d31f92"},{"id":"42bd2317a8","mes":"Out/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"6/12","proj":true,"grupoId":"5773d31f92"},{"id":"b27b882819","mes":"Nov/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"7/12","proj":true,"grupoId":"5773d31f92"},{"id":"1cbef481c7","mes":"Dez/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"5773d31f92"},{"id":"49b3db1c76","mes":"Jan/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"5773d31f92"},{"id":"866bf12cfb","mes":"Fev/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"5773d31f92"},{"id":"8b4bbdd31c","mes":"Mar/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"5773d31f92"},{"id":"7a3bd00054","mes":"Abr/27","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1358.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"5773d31f92"},{"id":"b1d899521c","mes":"Ago/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"b44f9008e4"},{"id":"811b288164","mes":"Set/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"b44f9008e4"},{"id":"d9ef16b59c","mes":"Out/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"b44f9008e4"},{"id":"588d3a88ff","mes":"Nov/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"b44f9008e4"},{"id":"9b7edbcbe","mes":"Dez/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"b44f9008e4"},{"id":"71b8505a32","mes":"Jan/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"b44f9008e4"},{"id":"732561cb0f","mes":"Fev/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"b44f9008e4"},{"id":"99cd86f5d3","mes":"Mar/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"b44f9008e4"},{"id":"5efac7d64","mes":"Abr/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":41.61,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"b44f9008e4"},{"id":"e62cb5ed19","mes":"Ago/26","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"4/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"669ad6d46e","mes":"Set/26","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"b8b650deef","mes":"Out/26","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"40e0167ee","mes":"Nov/26","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"7fee13d27f","mes":"Dez/26","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"bd20dcf687","mes":"Jan/27","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"6b61783081","mes":"Fev/27","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"b2f738f132","mes":"Mar/27","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"d27a29e57f","mes":"Abr/27","data":"2026-08-01","desc":"Tokio Marine (Seguro Carro)","cat":"Despesas Veículo","val":293.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"f18b7cfc03"},{"id":"d20067967c","mes":"Ago/26","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"5/12","proj":true,"grupoId":"772bf5da8"},{"id":"602d6edc1b","mes":"Set/26","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"6/12","proj":true,"grupoId":"772bf5da8"},{"id":"c857c79e13","mes":"Out/26","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"7/12","proj":true,"grupoId":"772bf5da8"},{"id":"8e353346e7","mes":"Nov/26","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"8/12","proj":true,"grupoId":"772bf5da8"},{"id":"5631fa2669","mes":"Dez/26","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"9/12","proj":true,"grupoId":"772bf5da8"},{"id":"e81b8172b","mes":"Jan/27","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"10/12","proj":true,"grupoId":"772bf5da8"},{"id":"602ac92bb3","mes":"Fev/27","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"11/12","proj":true,"grupoId":"772bf5da8"},{"id":"82a1903c5d","mes":"Mar/27","data":"2026-08-01","desc":"Anuidade","cat":"Assinaturas","val":25.0,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"12/12","proj":true,"grupoId":"772bf5da8"},{"id":"324f84dfd1","mes":"Ago/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"5/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"9b86a308ce","mes":"Set/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"9bec68bd2d","mes":"Out/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"bf71a8f653","mes":"Nov/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"c515827344","mes":"Dez/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"cdd1dd6725","mes":"Jan/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"4708967c35","mes":"Fev/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"e1d5661923","mes":"Mar/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":109.02,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"b211cb9ab0"},{"id":"8e27be31a8","mes":"Ago/26","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/10","proj":true,"grupoId":"3533c5ada0"},{"id":"fb8db05b8f","mes":"Set/26","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/10","proj":true,"grupoId":"3533c5ada0"},{"id":"872e7266de","mes":"Out/26","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/10","proj":true,"grupoId":"3533c5ada0"},{"id":"865530f484","mes":"Nov/26","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/10","proj":true,"grupoId":"3533c5ada0"},{"id":"2a1e18abb2","mes":"Dez/26","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/10","proj":true,"grupoId":"3533c5ada0"},{"id":"5801581b5","mes":"Jan/27","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/10","proj":true,"grupoId":"3533c5ada0"},{"id":"78c65c5985","mes":"Fev/27","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/10","proj":true,"grupoId":"3533c5ada0"},{"id":"80c97cb152","mes":"Mar/27","data":"2026-08-01","desc":"Jr Tenis","cat":"Outros","val":136.65,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/10","proj":true,"grupoId":"3533c5ada0"},{"id":"d0d167314e","mes":"Ago/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":137.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"6/12","proj":true,"grupoId":"2c6217facb"},{"id":"63ebc791b8","mes":"Set/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":137.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"7/12","proj":true,"grupoId":"2c6217facb"},{"id":"6a36d98ef0","mes":"Out/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":137.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"8/12","proj":true,"grupoId":"2c6217facb"},{"id":"3fe4771e6e","mes":"Nov/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":137.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"9/12","proj":true,"grupoId":"2c6217facb"},{"id":"d185c05f3e","mes":"Dez/26","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":137.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"10/12","proj":true,"grupoId":"2c6217facb"},{"id":"bf12b5c568","mes":"Jan/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":137.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"11/12","proj":true,"grupoId":"2c6217facb"},{"id":"227efea835","mes":"Fev/27","data":"2026-08-01","desc":"Wellhub (gympass)","cat":"Cuidados Pessoais","val":137.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"12/12","proj":true,"grupoId":"2c6217facb"},{"id":"df6131f4e7","mes":"Ago/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":160.3,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"6/12","proj":true,"grupoId":"cf3c3aced0"},{"id":"9a3e773a69","mes":"Set/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":160.3,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"cf3c3aced0"},{"id":"bad8e8977e","mes":"Out/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":160.3,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"cf3c3aced0"},{"id":"98e1ac36fb","mes":"Nov/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":160.3,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"cf3c3aced0"},{"id":"4e42a8785e","mes":"Dez/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":160.3,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"cf3c3aced0"},{"id":"f7bbba64ac","mes":"Jan/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":160.3,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"cf3c3aced0"},{"id":"74a3260aa5","mes":"Fev/27","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":160.3,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"cf3c3aced0"},{"id":"83898a8f3d","mes":"Ago/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.06,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/12","proj":true,"grupoId":"ddc7563c72"},{"id":"83187d1d54","mes":"Set/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.06,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"ddc7563c72"},{"id":"892b075502","mes":"Out/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.06,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"ddc7563c72"},{"id":"6a6312fc13","mes":"Nov/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.06,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"ddc7563c72"},{"id":"238b7098e1","mes":"Dez/26","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.06,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"ddc7563c72"},{"id":"596bddf067","mes":"Jan/27","data":"2026-08-01","desc":"Openai chatgpt","cat":"Assinaturas","val":43.06,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"ddc7563c72"},{"id":"fb95dac927","mes":"Ago/26","data":"2026-08-01","desc":"Redfox","cat":"Assinaturas","val":100.0,"resp":"Pai","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"f89e42e173"},{"id":"6bc0f387f4","mes":"Set/26","data":"2026-08-01","desc":"Redfox","cat":"Assinaturas","val":100.0,"resp":"Pai","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"f89e42e173"},{"id":"5e68689989","mes":"Out/26","data":"2026-08-01","desc":"Redfox","cat":"Assinaturas","val":100.0,"resp":"Pai","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"f89e42e173"},{"id":"97bbad65d7","mes":"Nov/26","data":"2026-08-01","desc":"Redfox","cat":"Assinaturas","val":100.0,"resp":"Pai","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"f89e42e173"},{"id":"d518fefb8f","mes":"Dez/26","data":"2026-08-01","desc":"Redfox","cat":"Assinaturas","val":100.0,"resp":"Pai","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"f89e42e173"},{"id":"db85e99b38","mes":"Ago/26","data":"2026-08-01","desc":"Agua","cat":"Moradia","val":50.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"fb42e69481"},{"id":"63e4ca3f53","mes":"Set/26","data":"2026-08-01","desc":"Agua","cat":"Moradia","val":50.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"fb42e69481"},{"id":"d7266a29fb","mes":"Out/26","data":"2026-08-01","desc":"Agua","cat":"Moradia","val":50.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"fb42e69481"},{"id":"8e8e2c1510","mes":"Nov/26","data":"2026-08-01","desc":"Agua","cat":"Moradia","val":50.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"fb42e69481"},{"id":"54aeb2bcc9","mes":"Dez/26","data":"2026-08-01","desc":"Agua","cat":"Moradia","val":50.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"fb42e69481"},{"id":"7ad8e56299","mes":"Ago/26","data":"2026-08-01","desc":"Spotify","cat":"Assinaturas","val":40.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"2235b52c03"},{"id":"8577707f","mes":"Set/26","data":"2026-08-01","desc":"Spotify","cat":"Assinaturas","val":40.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"2235b52c03"},{"id":"6e7d418001","mes":"Out/26","data":"2026-08-01","desc":"Spotify","cat":"Assinaturas","val":40.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"2235b52c03"},{"id":"a16fc56489","mes":"Nov/26","data":"2026-08-01","desc":"Spotify","cat":"Assinaturas","val":40.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"2235b52c03"},{"id":"d14df799c","mes":"Dez/26","data":"2026-08-01","desc":"Spotify","cat":"Assinaturas","val":40.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"2235b52c03"},{"id":"44baa55968","mes":"Ago/26","data":"2026-08-01","desc":"Mãe","cat":"Outros","val":300.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"f8093b4ca7"},{"id":"a954211cf","mes":"Set/26","data":"2026-08-01","desc":"Mãe","cat":"Outros","val":300.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"f8093b4ca7"},{"id":"6f5282f7e6","mes":"Out/26","data":"2026-08-01","desc":"Mãe","cat":"Outros","val":300.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"f8093b4ca7"},{"id":"9e62c7d11b","mes":"Nov/26","data":"2026-08-01","desc":"Mãe","cat":"Outros","val":300.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"f8093b4ca7"},{"id":"522d1d2f69","mes":"Dez/26","data":"2026-08-01","desc":"Mãe","cat":"Outros","val":300.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"f8093b4ca7"},{"id":"f954d7bc68","mes":"Ago/26","data":"2026-08-01","desc":"Glx Barbearia","cat":"Cuidados Pessoais","val":160.0,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"8/12","proj":true,"grupoId":"da48a0873a"},{"id":"85b677f8f1","mes":"Set/26","data":"2026-08-01","desc":"Glx Barbearia","cat":"Cuidados Pessoais","val":160.0,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"9/12","proj":true,"grupoId":"da48a0873a"},{"id":"47e6d227fe","mes":"Out/26","data":"2026-08-01","desc":"Glx Barbearia","cat":"Cuidados Pessoais","val":160.0,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"10/12","proj":true,"grupoId":"da48a0873a"},{"id":"9ad7779d71","mes":"Nov/26","data":"2026-08-01","desc":"Glx Barbearia","cat":"Cuidados Pessoais","val":160.0,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"11/12","proj":true,"grupoId":"da48a0873a"},{"id":"2f03f02950","mes":"Dez/26","data":"2026-08-01","desc":"Glx Barbearia","cat":"Cuidados Pessoais","val":160.0,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"12/12","proj":true,"grupoId":"da48a0873a"},{"id":"9869a4b176","mes":"Ago/26","data":"2026-08-01","desc":"Dizimo","cat":"Outros","val":100.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"70573e6d61"},{"id":"2fa59cab02","mes":"Set/26","data":"2026-08-01","desc":"Dizimo","cat":"Outros","val":100.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"70573e6d61"},{"id":"e154d5f587","mes":"Out/26","data":"2026-08-01","desc":"Dizimo","cat":"Outros","val":100.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"70573e6d61"},{"id":"b14b2de34b","mes":"Nov/26","data":"2026-08-01","desc":"Dizimo","cat":"Outros","val":100.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"70573e6d61"},{"id":"1cc1ed93b2","mes":"Dez/26","data":"2026-08-01","desc":"Dizimo","cat":"Outros","val":100.0,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"70573e6d61"},{"id":"fecf8f719a","mes":"Ago/26","data":"2026-08-01","desc":"Montefusco - Dermatologista","cat":"Cuidados Pessoais","val":500.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/10","proj":true,"grupoId":"fd6c352208"},{"id":"e9e5cf1fb2","mes":"Set/26","data":"2026-08-01","desc":"Montefusco - Dermatologista","cat":"Cuidados Pessoais","val":500.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/10","proj":true,"grupoId":"fd6c352208"},{"id":"70a760aeb3","mes":"Out/26","data":"2026-08-01","desc":"Montefusco - Dermatologista","cat":"Cuidados Pessoais","val":500.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/10","proj":true,"grupoId":"fd6c352208"},{"id":"5d053eda1c","mes":"Nov/26","data":"2026-08-01","desc":"Montefusco - Dermatologista","cat":"Cuidados Pessoais","val":500.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/10","proj":true,"grupoId":"fd6c352208"},{"id":"95ad415024","mes":"Dez/26","data":"2026-08-01","desc":"Montefusco - Dermatologista","cat":"Cuidados Pessoais","val":500.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/10","proj":true,"grupoId":"fd6c352208"},{"id":"5f6537abef","mes":"Ago/26","data":"2026-08-01","desc":"Mercado livre (Colchão)","cat":"Outros","val":208.23,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"2/6","proj":true,"grupoId":"ab31efc6b4"},{"id":"5c6fdfce84","mes":"Set/26","data":"2026-08-01","desc":"Mercado livre (Colchão)","cat":"Outros","val":208.23,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"3/6","proj":true,"grupoId":"ab31efc6b4"},{"id":"a3cc065792","mes":"Out/26","data":"2026-08-01","desc":"Mercado livre (Colchão)","cat":"Outros","val":208.23,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"4/6","proj":true,"grupoId":"ab31efc6b4"},{"id":"a7d31f26b1","mes":"Nov/26","data":"2026-08-01","desc":"Mercado livre (Colchão)","cat":"Outros","val":208.23,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"5/6","proj":true,"grupoId":"ab31efc6b4"},{"id":"92f91ade5e","mes":"Dez/26","data":"2026-08-01","desc":"Mercado livre (Colchão)","cat":"Outros","val":208.23,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"6/6","proj":true,"grupoId":"ab31efc6b4"},{"id":"7ccc9a334e","mes":"Ago/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.73,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"22592d80e0"},{"id":"94f98e9e4","mes":"Set/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.73,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"22592d80e0"},{"id":"3704c98959","mes":"Out/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.73,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"22592d80e0"},{"id":"c1d54fc2d6","mes":"Nov/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.73,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"22592d80e0"},{"id":"509ad5436a","mes":"Dez/26","data":"2026-08-01","desc":"Condominio","cat":"Moradia","val":125.73,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"22592d80e0"},{"id":"6119ad6310","mes":"Ago/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":183.7,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"df8069e25d"},{"id":"b4f450bb45","mes":"Set/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":183.7,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"df8069e25d"},{"id":"35b3bde915","mes":"Out/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":183.7,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"df8069e25d"},{"id":"50cd104def","mes":"Nov/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":183.7,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"df8069e25d"},{"id":"8dbde3477e","mes":"Dez/26","data":"2026-08-01","desc":"Luz","cat":"Moradia","val":183.7,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"df8069e25d"},{"id":"203fe7de51","mes":"Ago/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":100.0,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"d9747db16b"},{"id":"efa93a296a","mes":"Set/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":100.0,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"d9747db16b"},{"id":"527cb31cdd","mes":"Out/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":100.0,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"d9747db16b"},{"id":"d019644f41","mes":"Nov/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":100.0,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"d9747db16b"},{"id":"4f888a318c","mes":"Dez/26","data":"2026-08-01","desc":"Internet Casa Vivo","cat":"Moradia","val":100.0,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"d9747db16b"},{"id":"60b46ff7e3","mes":"Ago/26","data":"2026-08-01","desc":"Escola Ana Morais (Mensalidade)","cat":"Educação","val":255.6,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"3c8e1edcf8"},{"id":"98345b9ec2","mes":"Set/26","data":"2026-08-01","desc":"Escola Ana Morais (Mensalidade)","cat":"Educação","val":255.6,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"3c8e1edcf8"},{"id":"717be62f1f","mes":"Out/26","data":"2026-08-01","desc":"Escola Ana Morais (Mensalidade)","cat":"Educação","val":255.6,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"3c8e1edcf8"},{"id":"d268227fcb","mes":"Nov/26","data":"2026-08-01","desc":"Escola Ana Morais (Mensalidade)","cat":"Educação","val":255.6,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"3c8e1edcf8"},{"id":"f2f2d514a3","mes":"Dez/26","data":"2026-08-01","desc":"Escola Ana Morais (Mensalidade)","cat":"Educação","val":255.6,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"3c8e1edcf8"},{"id":"72deadd35b","mes":"Ago/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":221.06,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/6","proj":true,"grupoId":"233404e53e"},{"id":"796dcb2747","mes":"Set/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":221.06,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"3/6","proj":true,"grupoId":"233404e53e"},{"id":"660e9e4895","mes":"Out/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":221.06,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"4/6","proj":true,"grupoId":"233404e53e"},{"id":"542f1d1ce4","mes":"Nov/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":221.06,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"5/6","proj":true,"grupoId":"233404e53e"},{"id":"e2927391a","mes":"Dez/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":221.06,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"6/6","proj":true,"grupoId":"233404e53e"},{"id":"d51fca10ec","mes":"Ago/26","data":"2026-08-01","desc":"Apple (assinatura Mãe)","cat":"Assinaturas","val":5.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"7780f8195d"},{"id":"31bc543c2a","mes":"Set/26","data":"2026-08-01","desc":"Apple (assinatura Mãe)","cat":"Assinaturas","val":5.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"7780f8195d"},{"id":"6c0e203724","mes":"Out/26","data":"2026-08-01","desc":"Apple (assinatura Mãe)","cat":"Assinaturas","val":5.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"7780f8195d"},{"id":"36c553ce0b","mes":"Nov/26","data":"2026-08-01","desc":"Apple (assinatura Mãe)","cat":"Assinaturas","val":5.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"7780f8195d"},{"id":"ab2bf64386","mes":"Dez/26","data":"2026-08-01","desc":"Apple (assinatura Mãe)","cat":"Assinaturas","val":5.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"7780f8195d"},{"id":"7484d9e790","mes":"Ago/26","data":"2026-08-01","desc":"Microsoft","cat":"Assinaturas","val":12.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"6/10","proj":true,"grupoId":"bc05703c5f"},{"id":"3e325e80c1","mes":"Set/26","data":"2026-08-01","desc":"Microsoft","cat":"Assinaturas","val":12.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"7/10","proj":true,"grupoId":"bc05703c5f"},{"id":"2530727e1d","mes":"Out/26","data":"2026-08-01","desc":"Microsoft","cat":"Assinaturas","val":12.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/10","proj":true,"grupoId":"bc05703c5f"},{"id":"341d150163","mes":"Nov/26","data":"2026-08-01","desc":"Microsoft","cat":"Assinaturas","val":12.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/10","proj":true,"grupoId":"bc05703c5f"},{"id":"1f752ce0ce","mes":"Dez/26","data":"2026-08-01","desc":"Microsoft","cat":"Assinaturas","val":12.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/10","proj":true,"grupoId":"bc05703c5f"},{"id":"b01e7e9f45","mes":"Ago/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":139.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"9541cea0cc"},{"id":"42fd58d802","mes":"Set/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":139.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"9541cea0cc"},{"id":"7645809c56","mes":"Out/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":139.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"9541cea0cc"},{"id":"12f622bd77","mes":"Nov/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":139.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"9541cea0cc"},{"id":"f001e9985b","mes":"Dez/26","data":"2026-08-01","desc":"Mensalidade Contabilizei","cat":"Despesas Empresa","val":139.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"9541cea0cc"},{"id":"be7518520c","mes":"Ago/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1427.75,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"9e87f7b6d8"},{"id":"5f03016b1a","mes":"Set/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1427.75,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"9e87f7b6d8"},{"id":"d95371a5a6","mes":"Out/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1427.75,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"9e87f7b6d8"},{"id":"2bc6eac00e","mes":"Nov/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1427.75,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"9e87f7b6d8"},{"id":"dc0aa73a48","mes":"Dez/26","data":"2026-08-01","desc":"Impostos - Empresa","cat":"Despesas Empresa","val":1427.75,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"9e87f7b6d8"},{"id":"4eac867974","mes":"Ago/26","data":"2026-08-01","desc":"Google YoutubePremiun","cat":"Assinaturas","val":26.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"1c373359b0"},{"id":"a0e22b895a","mes":"Set/26","data":"2026-08-01","desc":"Google YoutubePremiun","cat":"Assinaturas","val":26.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"1c373359b0"},{"id":"b3e454eb62","mes":"Out/26","data":"2026-08-01","desc":"Google YoutubePremiun","cat":"Assinaturas","val":26.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"1c373359b0"},{"id":"8abab2c9ef","mes":"Nov/26","data":"2026-08-01","desc":"Google YoutubePremiun","cat":"Assinaturas","val":26.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"1c373359b0"},{"id":"8d5a508f8","mes":"Dez/26","data":"2026-08-01","desc":"Google YoutubePremiun","cat":"Assinaturas","val":26.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"1c373359b0"},{"id":"e1566557af","mes":"Ago/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":189.59,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"8/12","proj":true,"grupoId":"844e81366"},{"id":"42a0c28840","mes":"Set/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":189.59,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"9/12","proj":true,"grupoId":"844e81366"},{"id":"70ac543606","mes":"Out/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":189.59,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"10/12","proj":true,"grupoId":"844e81366"},{"id":"9b096fb740","mes":"Nov/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":189.59,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"11/12","proj":true,"grupoId":"844e81366"},{"id":"693fc72a96","mes":"Dez/26","data":"2026-08-01","desc":"Claro","cat":"Moradia","val":189.59,"resp":"Diogo/Diego","pgto":"Pix","cartao":"Pix","parcela":"12/12","proj":true,"grupoId":"844e81366"},{"id":"5357f603b6","mes":"Ago/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"67fc926c9c"},{"id":"b9fb8cf37b","mes":"Set/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"67fc926c9c"},{"id":"ba2a9675e8","mes":"Out/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"67fc926c9c"},{"id":"574302da63","mes":"Nov/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"67fc926c9c"},{"id":"31fb4aa32b","mes":"Dez/26","data":"2026-08-01","desc":"Apple (assinatura)","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"67fc926c9c"},{"id":"735bfce217","mes":"Ago/26","data":"2026-08-01","desc":"Apple","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"85fc2d043f"},{"id":"f247c7af2d","mes":"Set/26","data":"2026-08-01","desc":"Apple","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"85fc2d043f"},{"id":"f1cd72fbac","mes":"Out/26","data":"2026-08-01","desc":"Apple","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"85fc2d043f"},{"id":"3510fa839f","mes":"Nov/26","data":"2026-08-01","desc":"Apple","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"85fc2d043f"},{"id":"5346b78b81","mes":"Dez/26","data":"2026-08-01","desc":"Apple","cat":"Assinaturas","val":14.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"85fc2d043f"},{"id":"64c2dc43f","mes":"Ago/26","data":"2026-08-01","desc":"Meli+","cat":"Assinaturas","val":9.9,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"8/12","proj":true,"grupoId":"b8a6fb8db4"},{"id":"af9aa032d2","mes":"Set/26","data":"2026-08-01","desc":"Meli+","cat":"Assinaturas","val":9.9,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"9/12","proj":true,"grupoId":"b8a6fb8db4"},{"id":"832d16fc16","mes":"Out/26","data":"2026-08-01","desc":"Meli+","cat":"Assinaturas","val":9.9,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"10/12","proj":true,"grupoId":"b8a6fb8db4"},{"id":"d4d2bdb27a","mes":"Nov/26","data":"2026-08-01","desc":"Meli+","cat":"Assinaturas","val":9.9,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"11/12","proj":true,"grupoId":"b8a6fb8db4"},{"id":"10c90f32d5","mes":"Dez/26","data":"2026-08-01","desc":"Meli+","cat":"Assinaturas","val":9.9,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"12/12","proj":true,"grupoId":"b8a6fb8db4"},{"id":"47f9587679","mes":"Ago/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":98.57,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"8/12","proj":true,"grupoId":"7b5dc691e7"},{"id":"33d8bb5b60","mes":"Set/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":98.57,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"9/12","proj":true,"grupoId":"7b5dc691e7"},{"id":"eb82fc223f","mes":"Out/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":98.57,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"10/12","proj":true,"grupoId":"7b5dc691e7"},{"id":"6153d3fb1f","mes":"Nov/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":98.57,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"11/12","proj":true,"grupoId":"7b5dc691e7"},{"id":"f248f74aca","mes":"Dez/26","data":"2026-08-01","desc":"Sem Parar","cat":"Despesas Veículo","val":98.57,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"12/12","proj":true,"grupoId":"7b5dc691e7"},{"id":"640ad91c56","mes":"Ago/26","data":"2026-08-01","desc":"IPVA","cat":"Despesas Veículo","val":317.32,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"2/5","proj":true,"grupoId":"8afe2ff49d"},{"id":"9691697cf6","mes":"Set/26","data":"2026-08-01","desc":"IPVA","cat":"Despesas Veículo","val":317.32,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"3/5","proj":true,"grupoId":"8afe2ff49d"},{"id":"9a740aa041","mes":"Out/26","data":"2026-08-01","desc":"IPVA","cat":"Despesas Veículo","val":317.32,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"4/5","proj":true,"grupoId":"8afe2ff49d"},{"id":"e901bc500b","mes":"Nov/26","data":"2026-08-01","desc":"IPVA","cat":"Despesas Veículo","val":317.32,"resp":"Diogo/Camila","pgto":"Pix","cartao":"Pix","parcela":"5/5","proj":true,"grupoId":"8afe2ff49d"},{"id":"b74e9208e2","mes":"Ago/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":118.76,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/5","proj":true,"grupoId":"d48dffde14"},{"id":"43c4c85110","mes":"Set/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":118.76,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"3/5","proj":true,"grupoId":"d48dffde14"},{"id":"dbd6f778c1","mes":"Out/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":118.76,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"4/5","proj":true,"grupoId":"d48dffde14"},{"id":"cf51e5b6ab","mes":"Nov/26","data":"2026-08-01","desc":"Mercadocar Auto Peças","cat":"Despesas Veículo","val":118.76,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"5/5","proj":true,"grupoId":"d48dffde14"},{"id":"a98c8ba8f","mes":"Ago/26","data":"2026-08-01","desc":"Nesthoes (Tenis Adidas)","cat":"Despesas Gerais","val":70.03,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/5","proj":true,"grupoId":"65768b393c"},{"id":"a5e26a0cb7","mes":"Set/26","data":"2026-08-01","desc":"Nesthoes (Tenis Adidas)","cat":"Despesas Gerais","val":70.03,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/5","proj":true,"grupoId":"65768b393c"},{"id":"ceff6314fb","mes":"Out/26","data":"2026-08-01","desc":"Nesthoes (Tenis Adidas)","cat":"Despesas Gerais","val":70.03,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/5","proj":true,"grupoId":"65768b393c"},{"id":"390acdf97","mes":"Nov/26","data":"2026-08-01","desc":"Nesthoes (Tenis Adidas)","cat":"Despesas Gerais","val":70.03,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"5/5","proj":true,"grupoId":"65768b393c"},{"id":"5e73dd19db","mes":"Ago/26","data":"2026-08-01","desc":"JM Santos Mecanica","cat":"Despesas Veículo","val":287.5,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/4","proj":true,"grupoId":"9d541471e"},{"id":"55273f38ed","mes":"Set/26","data":"2026-08-01","desc":"JM Santos Mecanica","cat":"Despesas Veículo","val":287.5,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"3/4","proj":true,"grupoId":"9d541471e"},{"id":"beae89a472","mes":"Out/26","data":"2026-08-01","desc":"JM Santos Mecanica","cat":"Despesas Veículo","val":287.5,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"4/4","proj":true,"grupoId":"9d541471e"},{"id":"3037cac45a","mes":"Ago/26","data":"2026-08-01","desc":"Fusion Modas (Bras)","cat":"Cuidados Pessoais","val":145.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/4","proj":true,"grupoId":"61fd009b0e"},{"id":"e557ed23dc","mes":"Set/26","data":"2026-08-01","desc":"Fusion Modas (Bras)","cat":"Cuidados Pessoais","val":145.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/4","proj":true,"grupoId":"61fd009b0e"},{"id":"934f6de4b6","mes":"Out/26","data":"2026-08-01","desc":"Fusion Modas (Bras)","cat":"Cuidados Pessoais","val":145.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/4","proj":true,"grupoId":"61fd009b0e"},{"id":"eeb7af9e3b","mes":"Ago/26","data":"2026-08-01","desc":"Placa esteira","cat":"Outros","val":80.0,"resp":"Pai","pgto":"Crédito","cartao":"Mercado Pago","parcela":"4/6","proj":true,"grupoId":"8ae04a47ad"},{"id":"6f65df15f4","mes":"Set/26","data":"2026-08-01","desc":"Placa esteira","cat":"Outros","val":80.0,"resp":"Pai","pgto":"Crédito","cartao":"Mercado Pago","parcela":"5/6","proj":true,"grupoId":"8ae04a47ad"},{"id":"8f6df26bed","mes":"Out/26","data":"2026-08-01","desc":"Placa esteira","cat":"Outros","val":80.0,"resp":"Pai","pgto":"Crédito","cartao":"Mercado Pago","parcela":"6/6","proj":true,"grupoId":"8ae04a47ad"},{"id":"b7fc950490","mes":"Ago/26","data":"2026-08-01","desc":"Amazon (Purificador Pai)","cat":"Outros","val":112.48,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/4","proj":true,"grupoId":"f3089eeb3d"},{"id":"e612eeaf11","mes":"Set/26","data":"2026-08-01","desc":"Amazon (Purificador Pai)","cat":"Outros","val":112.48,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/4","proj":true,"grupoId":"f3089eeb3d"},{"id":"788759e7ba","mes":"Out/26","data":"2026-08-01","desc":"Amazon (Purificador Pai)","cat":"Outros","val":112.48,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"4/4","proj":true,"grupoId":"f3089eeb3d"},{"id":"852aba3d2","mes":"Ago/26","data":"2026-08-01","desc":"Hdi Seguros","cat":"Despesas Veículo","val":271.4,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"9/10","proj":true,"grupoId":"77795b5cc2"},{"id":"dad335c6be","mes":"Set/26","data":"2026-08-01","desc":"Hdi Seguros","cat":"Despesas Veículo","val":271.4,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"10/10","proj":true,"grupoId":"77795b5cc2"},{"id":"fa77371978","mes":"Ago/26","data":"2026-08-01","desc":"Larissa Evelyn Peixoto (estetica Camila)","cat":"Cuidados Pessoais","val":119.0,"resp":"Camila","pgto":"Crédito","cartao":"Nubank","parcela":"9/10","proj":true,"grupoId":"68331ccf36"},{"id":"d3c2423ef2","mes":"Set/26","data":"2026-08-01","desc":"Larissa Evelyn Peixoto (estetica Camila)","cat":"Cuidados Pessoais","val":119.0,"resp":"Camila","pgto":"Crédito","cartao":"Nubank","parcela":"10/10","proj":true,"grupoId":"68331ccf36"},{"id":"6251de5855","mes":"Ago/26","data":"2026-08-01","desc":"Cataratas","cat":"Lazer","val":70.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"2/3","proj":true,"grupoId":"acf03b5553"},{"id":"8823195c8e","mes":"Set/26","data":"2026-08-01","desc":"Cataratas","cat":"Lazer","val":70.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"3/3","proj":true,"grupoId":"acf03b5553"},{"id":"e2606f5bb","mes":"Ago/26","data":"2026-08-01","desc":"Sh Intern (Renner)","cat":"Cuidados Pessoais","val":53.27,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"2243b4780b"},{"id":"f57cbe6a38","mes":"Set/26","data":"2026-08-01","desc":"Sh Intern (Renner)","cat":"Cuidados Pessoais","val":53.27,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"2243b4780b"},{"id":"5c581f0ea9","mes":"Ago/26","data":"2026-08-01","desc":"Cury Radiologia","cat":"Cuidados Pessoais","val":160.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"ecd9918431"},{"id":"a9d98fad30","mes":"Set/26","data":"2026-08-01","desc":"Cury Radiologia","cat":"Cuidados Pessoais","val":160.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"ecd9918431"},{"id":"4e854a0963","mes":"Ago/26","data":"2026-08-01","desc":"Mercado Livre (Sapato)","cat":"Cuidados Pessoais","val":83.49,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"2/3","proj":true,"grupoId":"7bcccdcb75"},{"id":"7308008ce4","mes":"Set/26","data":"2026-08-01","desc":"Mercado Livre (Sapato)","cat":"Cuidados Pessoais","val":83.49,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"3/3","proj":true,"grupoId":"7bcccdcb75"},{"id":"f2df60dc4","mes":"Ago/26","data":"2026-08-01","desc":"Armarinho Fernando","cat":"Educação","val":180.27,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"b8cfbcf7c3"},{"id":"d739230eba","mes":"Set/26","data":"2026-08-01","desc":"Armarinho Fernando","cat":"Educação","val":180.27,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"b8cfbcf7c3"},{"id":"9e0fac8da9","mes":"Ago/26","data":"2026-08-01","desc":"Bellas Pratas","cat":"Outros","val":92.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"3bef8a1ec8"},{"id":"d79da15a39","mes":"Set/26","data":"2026-08-01","desc":"Bellas Pratas","cat":"Outros","val":92.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"3bef8a1ec8"},{"id":"18cd520d2e","mes":"Ago/26","data":"2026-08-01","desc":"Sport Bras","cat":"Cuidados Pessoais","val":48.65,"resp":"Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"c346bd04d8"},{"id":"2114553b9d","mes":"Set/26","data":"2026-08-01","desc":"Sport Bras","cat":"Cuidados Pessoais","val":48.65,"resp":"Camila","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"c346bd04d8"},{"id":"f41964c810","mes":"Ago/26","data":"2026-08-01","desc":"Sport Bras","cat":"Cuidados Pessoais","val":43.33,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"8e79bb0751"},{"id":"f538bf2441","mes":"Set/26","data":"2026-08-01","desc":"Sport Bras","cat":"Cuidados Pessoais","val":43.33,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"8e79bb0751"},{"id":"80706e9aaf","mes":"Ago/26","data":"2026-08-01","desc":"Shoppe (Viagem)","cat":"Outros","val":129.92,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"62833e9f74"},{"id":"37f94925b1","mes":"Set/26","data":"2026-08-01","desc":"Shoppe (Viagem)","cat":"Outros","val":129.92,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"62833e9f74"},{"id":"7b6c891fc0","mes":"Ago/26","data":"2026-08-01","desc":"Shoppe (Viagem)","cat":"Outros","val":68.18,"resp":"Pai","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"2225066fd0"},{"id":"84a8b44dfe","mes":"Set/26","data":"2026-08-01","desc":"Shoppe (Viagem)","cat":"Outros","val":68.18,"resp":"Pai","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"2225066fd0"},{"id":"69778dcb49","mes":"Ago/26","data":"2026-08-01","desc":"Mercado livre (protetor + camisa)","cat":"Outros","val":39.93,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"2/3","proj":true,"grupoId":"cfb60e8a7a"},{"id":"e5481cf928","mes":"Set/26","data":"2026-08-01","desc":"Mercado livre (protetor + camisa)","cat":"Outros","val":39.93,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"3/3","proj":true,"grupoId":"cfb60e8a7a"},{"id":"8f87e2ab53","mes":"Ago/26","data":"2026-08-01","desc":"Dr Consulta (Mãe)","cat":"Saúde","val":41.11,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"d0d2de7545"},{"id":"4e5ad5e557","mes":"Set/26","data":"2026-08-01","desc":"Dr Consulta (Mãe)","cat":"Saúde","val":41.11,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"d0d2de7545"},{"id":"501d99a0db","mes":"Ago/26","data":"2026-08-01","desc":"Mercado Livre (Painel Ripado)","cat":"Outros","val":159.52,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"2/3","proj":true,"grupoId":"8f7ca634cf"},{"id":"c9462c4fdf","mes":"Set/26","data":"2026-08-01","desc":"Mercado Livre (Painel Ripado)","cat":"Outros","val":159.52,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"3/3","proj":true,"grupoId":"8f7ca634cf"},{"id":"438399a066","mes":"Ago/26","data":"2026-08-01","desc":"Shoppe (Quadro)","cat":"Outros","val":77.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/3","proj":true,"grupoId":"5539c06b90"},{"id":"4be3adbb5e","mes":"Set/26","data":"2026-08-01","desc":"Shoppe (Quadro)","cat":"Outros","val":77.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"5539c06b90"},{"id":"8173dd4fdd","mes":"Ago/26","data":"2026-08-01","desc":"Larissa Evelyn Peixoto (estetica Camila)","cat":"Cuidados Pessoais","val":159.8,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"10/10","proj":true,"grupoId":"a85d9f2f33"},{"id":"9640909e53","mes":"Ago/26","data":"2026-08-01","desc":"Olxpay (celular)","cat":"Outros","val":1397.96,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"676ad4a153"},{"id":"ee4bc866fa","mes":"Ago/26","data":"2026-08-01","desc":"Decolar (viagem Natal)","cat":"Lazer","val":381.74,"resp":"Ademar","pgto":"Crédito","cartao":"Bradesco","parcela":"8/8","proj":true,"grupoId":"a326f8695d"},{"id":"66432398e8","mes":"Ago/26","data":"2026-08-01","desc":"Decolar (viagem Natal)","cat":"Lazer","val":763.48,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"8/8","proj":true,"grupoId":"5b9ccee68c"},{"id":"e17b255bc4","mes":"Ago/26","data":"2026-08-01","desc":"Pamella Diniz (Calçado)","cat":"Presentes","val":95.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"369e9b337d"},{"id":"2b80dfc5e9","mes":"Ago/26","data":"2026-08-01","desc":"Pamella Diniz (Calçado)","cat":"Outros","val":47.5,"resp":"Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"c1e34cb9fb"},{"id":"4fbce90b69","mes":"Ago/26","data":"2026-08-01","desc":"Eudora","cat":"Cuidados Pessoais","val":52.64,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"10d32e84cd"},{"id":"d23915ba6","mes":"Ago/26","data":"2026-08-01","desc":"Glc Suplementos","cat":"Suplementos","val":69.95,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"271e4dda4d"},{"id":"a214c9faa2","mes":"Ago/26","data":"2026-08-01","desc":"Lojas Conexão","cat":"Cuidados Pessoais","val":139.99,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"d4f4661efb"},{"id":"46a2386cba","mes":"Ago/26","data":"2026-08-01","desc":"C&A","cat":"Cuidados Pessoais","val":114.98,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"f938a27425"},{"id":"8ac098c801","mes":"Ago/26","data":"2026-08-01","desc":"Atlanta Auto","cat":"Despesas Veículo","val":165.87,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"3578c4da4d"},{"id":"ebe001a3c3","mes":"Ago/26","data":"2026-08-01","desc":"Escola Ana Morais (Livros)","cat":"Educação","val":195.2,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"f7d476954d"},{"id":"68b7903446","mes":"Ago/26","data":"2026-08-01","desc":"Outlet Multimarcas (Creme Camila)","cat":"Presentes","val":66.98,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"1cde6522dd"},{"id":"96ce12d40d","mes":"Ago/26","data":"2026-08-01","desc":"Armarinho Fernando","cat":"Educação","val":161.66,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"2/2","proj":true,"grupoId":"b1186be4ef"},{"id":"eba1db57d7","mes":"Ago/26","data":"2026-08-01","desc":"Blu Instituição (Colchão)","cat":"Outros","val":175.0,"resp":"Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"2/2","proj":true,"grupoId":"5a225f1b35"},{"id":"548e949ff0","mes":"Ago/26","data":"2026-08-01","desc":"Drogaria SP (Principia rosto)","cat":"Saúde","val":73.9,"resp":"Diogo","pgto":"Crédito","cartao":"Mercado Pago","parcela":"2/2","proj":true,"grupoId":"aba2f2d77f"},{"id":"42fe02c056","mes":"Ago/26","data":"2026-08-01","desc":"Drogaria SP (Catarina)","cat":"Saúde","val":73.34,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"8e258392d8"},{"id":"9475cd8cd4","mes":"Ago/26","data":"2026-08-01","desc":"Farmacia Pague Menos (Principia)","cat":"Saúde","val":90.97,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"741f10ae4a"},{"id":"18ba690fc8","mes":"Ago/26","data":"2026-08-01","desc":"Pague Menos (Catarina+Camila)","cat":"Saúde","val":68.97,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"c8d2f7c3b8"},{"id":"fa403f2cb5","mes":"Ago/26","data":"2026-08-01","desc":"Drogaria São paulo","cat":"Saúde","val":82.36,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Mercado Pago","parcela":"2/2","proj":true,"grupoId":"a862d994e5"},{"id":"744be4fbb0","mes":"Ago/26","data":"2026-08-01","desc":"Taxa de fiscalização da empresa","cat":"Despesas Empresa","val":354.14,"resp":"Diogo","pgto":"Pix","cartao":"Pix","parcela":"2/2","proj":true,"grupoId":"b2d25f6b6a"},{"id":"3f984bdfdd","mes":"Ago/26","data":"2026-08-01","desc":"Delboni","cat":"Saúde","val":121.5,"resp":"Diogo","pgto":"Crédito","cartao":"Bradesco","parcela":"2/2","proj":true,"grupoId":"a462e4bd41"},{"id":"3b5d53342f","mes":"Ago/26","data":"2026-08-01","desc":"Phitofarma (Manipulado)","cat":"Suplementos","val":100.0,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"858771b770"},{"id":"3b58590825","mes":"Ago/26","data":"2026-08-01","desc":"Drogaria SP","cat":"Saúde","val":172.12,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"f80ae00613"},{"id":"1b81cc62c6","mes":"Ago/26","data":"2026-08-01","desc":"Raia Drogasil (creme cabelo)","cat":"Saúde","val":25.0,"resp":"Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"bfe38ada2c"},{"id":"d40193586","mes":"Ago/26","data":"2026-08-01","desc":"Raia Drogasil","cat":"Saúde","val":73.31,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"d51f6e12f1"},{"id":"8d8a80f914","mes":"Ago/26","data":"2026-08-01","desc":"Atlanta (Troca de oleo)","cat":"Despesas Veículo","val":218.4,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"3/3","proj":true,"grupoId":"fd6334b8fa"},{"id":"42383521a1","mes":"Ago/26","data":"2026-08-01","desc":"Atlanta (Lampada)","cat":"Despesas Veículo","val":114.95,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"2/2","proj":true,"grupoId":"84a9db354b"},{"id":"4d88cafa1f","mes":"Ago/26","data":"2026-08-01","desc":"ZP Clinica (Soroterapia)","cat":"Saúde","val":300.0,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"1c1ee2175b"},{"id":"adb0e7ebab","mes":"Ago/26","data":"2026-08-01","desc":"Festoy Brinquedos","cat":"Outros","val":94.9,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"abd3541527"},{"id":"1ca1386bd7","mes":"Ago/26","data":"2026-08-01","desc":"GLC Suplementos","cat":"Suplementos","val":111.44,"resp":"Diogo","pgto":"Crédito","cartao":"Nubank","parcela":"2/2","proj":true,"grupoId":"989bafe2d9"},{"id":"6f8653b57f","mes":"Ago/26","data":"2026-08-01","desc":"Conserto Maquina (Cartão Camila)","cat":"Outros","val":466.67,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Nubank","parcela":"3/3","proj":true,"grupoId":"56923f521e"},{"id":"329bccaadf","mes":"Ago/26","data":"2026-08-01","desc":"Pontal (Calçados Catarina)","cat":"Outros","val":124.99,"resp":"Diogo/Camila","pgto":"Crédito","cartao":"Bradesco","parcela":"2/2","proj":true,"grupoId":"6a9aa1e8c1"}];
+// ══════════════════════════════════════════════════
+// CORE: Calendário, Helpers, State
+// ══════════════════════════════════════════════════
+const MN = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const MESES_SEQ = [];
+for (let y = 2026; y <= 2030; y++) {
+  for (let m = 0; m < 12; m++) MESES_SEQ.push(MN[m] + "/" + String(y).slice(2));
+}
+const HIST = new Set(["Ago/26","Set/26","Out/26","Nov/26","Dez/26","Jan/27","Fev/27","Mar/27"]);
+
+function mesIdx(k) { return MESES_SEQ.indexOf(k); }
+function mesLabel(k) {
+  const [m, y] = k.split("/");
+  return y === "26" ? m : m + " '" + y;
+}
+function addMeses(k, n) {
+  const i = mesIdx(k) + n;
+  return (i >= 0 && i < MESES_SEQ.length) ? MESES_SEQ[i] : null;
+}
+function mesAtual() {
+  const d = new Date();
+  return MN[d.getMonth()] + "/" + String(d.getFullYear()).slice(2);
+}
+
+const SK = "ft_v5";
+const DEF_CATS = ["Alimentação","Alimentação Serviço","Assinaturas","Combustível",
+  "Cuidados Pessoais","Despesas Empresa","Despesas Gerais","Despesas Veículo",
+  "Educação","Estacionamento Serviço","Internet","Lazer","Moradia","Outros",
+  "Presentes","Saúde","Supermercado","Suplementos","Transporte","Uber","Viagem"];
+const DEF_RESPS = ["Ademar","Camila","Dani","Diego","Diogo","Diogo/Camila","Diogo/Diego","Junior","Pai"];
+const DEF_CARTOES = ["Bradesco","C&A","Dinheiro","Mercado Pago","Nubank","Pix"];
+const DEF_PGTOS = ["Boleto","Crédito","Débito","Dinheiro","Pix"];
+const DEF_BANCOS = ["Nubank","Inter","XP","BTG Pactual","C6 Bank","Itaú","Bradesco"];
+const DEF_TIPOS_INV = ["CDB","CDI","LCI","LCA","Tesouro Selic","Tesouro IPCA+","Fundos","Ações","Outros"];
+
+function loadState() {
+  try {
+    const sv = localStorage.getItem(SK);
+    return sv ? JSON.parse(sv) : null;
+  } catch(e) { return null; }
+}
+
+function defaultState() {
+  return {
+    salary: 15000,
+    lancamentos: [],
+    rendaExtra: {},
+    reembolsosPagos: [],
+    investimentos: [],
+    cfg: {
+      cats: [...DEF_CATS], resps: [...DEF_RESPS],
+      cartoes: [...DEF_CARTOES], pgtos: [...DEF_PGTOS],
+      bancos: [...DEF_BANCOS], tiposInv: [...DEF_TIPOS_INV]
+    }
+  };
+}
+
+function buildInitialState(baseData) {
+  const s = defaultState();
+  s.lancamentos = baseData.map(r => ({
+    id: r.id, mes: r.mes, data: r.data, desc: r.desc, cat: r.cat,
+    val: r.val, resp: r.resp, pgto: r.pgto, cartao: r.cartao,
+    parcela: r.parcela, proj: r.proj !== undefined ? r.proj : true,
+    grupoId: r.grupoId || null
+  }));
+  return s;
+}
+
+// ── HELPERS NUMÉRICOS ──
+const r2 = v => Math.round(v * 100) / 100;
+const sumV = arr => arr.reduce((a, r) => a + r.val, 0);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const fmt = v => "R$\u00a0" + r2(v).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtK = v => {
+  const av = Math.abs(v);
+  const sign = v < 0 ? "-" : "";
+  if (av >= 1e6) return sign + "R$\u00a0" + (av/1e6).toFixed(2).replace(".",",") + "M";
+  if (av >= 1000) return sign + "R$\u00a0" + (av/1000).toFixed(1).replace(".",",") + "k";
+  return (v<0?"-":"") + fmt(av);
+};
+
+// ── DIVISÃO DE RESPONSABILIDADE ──
+function minhaFrac(resp) {
+  const partic = resp.split('/').map(s => s.trim()).filter(Boolean);
+  if (!partic.includes('Diogo')) return 0;
+  return 1 / partic.length;
+}
+function minhaParteVal(lanc) { return lanc.val * minhaFrac(lanc.resp); }
+function sumMinha(arr) { return arr.reduce((a, r) => a + minhaParteVal(r), 0); }
+
+// Quanto cada pessoa deve a Diogo, dado um array de lançamentos
+function calcDevedores(lancamentos) {
+  const dev = {}; // pessoa -> { total, items: [{...lanc, _deve}] }
+  lancamentos.forEach(l => {
+    const partic = l.resp.split('/').map(s => s.trim()).filter(Boolean);
+    if (!partic.includes('Diogo')) {
+      const pessoa = l.resp.trim();
+      if (!pessoa) return;
+      if (!dev[pessoa]) dev[pessoa] = { total: 0, items: [] };
+      dev[pessoa].total += l.val;
+      dev[pessoa].items.push({ ...l, _deve: l.val });
+    } else if (partic.length > 1) {
+      partic.filter(p => p !== 'Diogo').forEach(pessoa => {
+        if (!dev[pessoa]) dev[pessoa] = { total: 0, items: [] };
+        const deveEssa = l.val / partic.length;
+        dev[pessoa].total += deveEssa;
+        dev[pessoa].items.push({ ...l, _deve: deveEssa });
+      });
+    }
+  });
+  return dev;
+}
+
+// ══════════════════════════════════════════════════
+// UI HELPERS GENÉRICOS
+// ══════════════════════════════════════════════════
+const CE = {
+  "Moradia":"🏠","Alimentação":"🍽️","Supermercado":"🛒","Alimentação Serviço":"🍔",
+  "Saúde":"🏥","Educação":"📚","Lazer":"🎉","Viagem":"✈️","Combustível":"⛽",
+  "Despesas Veículo":"🚗","Transporte":"🚌","Uber":"🚕","Assinaturas":"📱",
+  "Internet":"🌐","Suplementos":"💊","Cuidados Pessoais":"💇","Despesas Empresa":"💼",
+  "Despesas Gerais":"📋","Outros":"📦","Presentes":"🎁","Estacionamento Serviço":"🅿️"
+};
+const PAL = ["#7C6AF5","#5EEAD4","#F9826C","#FBBF24","#34D399",
+             "#60A5FA","#F472B6","#A78BFA","#FB923C","#94A3B8","#4ADE80","#38BDF8"];
+const RCOL = ["#7C6AF5","#5EEAD4","#F9826C","#FBBF24","#34D399",
+              "#60A5FA","#F472B6","#A78BFA","#FB923C","#94A3B8"];
+
+function el(id) { return document.getElementById(id); }
+function setText(id, v) { const e = el(id); if (e) e.textContent = v; }
+function setHTML(id, v) { const e = el(id); if (e) e.innerHTML = v; }
+
+function escHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+let toastTimer;
+function toast(msg) {
+  const t = el("toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.style.opacity = "1";
+  t.style.transform = "translateX(-50%) translateY(0)";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.style.opacity = "0";
+    t.style.transform = "translateX(-50%) translateY(12px)";
+  }, 2400);
+}
+
+function buildMonthStrip(contId, curSel, ativos, maxFuturos, onPick) {
+  const cont = el(contId);
+  if (!cont) return;
+  cont.innerHTML = "";
+  const lastIdx = ativos.length ? Math.max(...ativos.map(mesIdx)) : mesIdx(mesAtual());
+  const toShow = MESES_SEQ.filter(k => mesIdx(k) <= lastIdx + maxFuturos && mesIdx(k) >= 0);
+  toShow.forEach(k => {
+    const isFut = !ativos.includes(k);
+    const btn = document.createElement("button");
+    btn.className = "mp" + (isFut ? " fut" : "") + (k === curSel ? " on" : "");
+    btn.textContent = mesLabel(k);
+    btn.onclick = () => {
+      cont.querySelectorAll(".mp").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+      onPick(k);
+    };
+    cont.appendChild(btn);
+  });
+  const active = cont.querySelector(".mp.on");
+  if (active) active.scrollIntoView({ block:"nearest", inline:"center" });
+}
+
+// ══════════════════════════════════════════════════
+// INICIALIZAÇÃO DO ESTADO
+// ══════════════════════════════════════════════════
+let S;
+const _saved = loadState();
+if (_saved) {
+  S = _saved;
+  // Garantir que campos novos existam mesmo em saves antigos
+  if (!S.investimentos) S.investimentos = [];
+  if (!S.reembolsosPagos) S.reembolsosPagos = [];
+  if (!S.cfg.bancos) S.cfg.bancos = [...DEF_BANCOS];
+  if (!S.cfg.tiposInv) S.cfg.tiposInv = [...DEF_TIPOS_INV];
+} else {
+  S = buildInitialState(BASE_DATA);
+}
+
+function saveSt() {
+  try { localStorage.setItem(SK, JSON.stringify(S)); } catch(e) { console.error("Save failed", e); }
+}
+if (!_saved) saveSt();
+
+// ══════════════════════════════════════════════════
+// DASHBOARD MENSAL (foco no mês, não no ano)
+// ══════════════════════════════════════════════════
+let selDash = (function() {
+  // Inicia no mês atual se houver dados nele; senão, no primeiro mês com dados futuro mais próximo
+  return mesAtual();  // será corrigido no init() via setInitialMonth()
+})();
+function setInitialMonth() {
+  const ativos = getMesesAtivos();
+  if (!ativos.length) return mesAtual();
+  const hoje = mesAtual();
+  if (ativos.includes(hoje)) return hoje;
+  // Se hoje é antes do primeiro mês ativo, usa o primeiro mês ativo
+  if (mesIdx(hoje) < mesIdx(ativos[0])) return ativos[0];
+  // Senão usa o último mês ativo (mais recente)
+  return ativos[ativos.length - 1];
+}
+const chInst = {};
+
+function getMesesAtivos() {
+  const seen = new Set(S.lancamentos.map(r => r.mes));
+  return MESES_SEQ.filter(k => seen.has(k));
+}
+function byM(mes) { return S.lancamentos.filter(r => r.mes === mes); }
+function renda(mes) {
+  return S.salary + ((S.rendaExtra[mes]||[]).reduce((a,r) => a+r.val, 0));
+}
+
+function initDashStrip() {
+  buildMonthStrip("ms-dash", selDash, getMesesAtivos(), 3, k => { selDash = k; renderDash(k); });
+}
+
+function renderDash(mes) {
+  selDash = mes;
+  initDashStrip();
+  setText("hdr-info", mesLabel(mes));
+  setText("d-mesnome", mesLabel(mes));
+
+  const dados = byM(mes);
+  const gastosTotal = sumV(dados);           // total desembolsado (cartão)
+  const meuGasto = sumMinha(dados);          // só minha parte real
+  const rd = renda(mes);
+  const saldo = rd - meuGasto;
+  const pct = rd > 0 ? Math.min(meuGasto/rd*100, 100) : 0;
+  const isProj = dados.length > 0 && dados.every(r => r.proj);
+  const isEmpty = dados.length === 0;
+
+  // Cabeçalho do saldo
+  setText("d-renda", fmt(rd));
+  setText("d-glbl", isProj ? "Meus Gastos (previstos)" : "Meus Gastos");
+  setText("d-gastos", fmt(meuGasto));
+  const difCompartilhado = gastosTotal - meuGasto;
+  setText("d-gastos-s", difCompartilhado > 0.01
+    ? `de ${fmt(gastosTotal)} no cartão (${fmt(difCompartilhado)} de outros)`
+    : "100% seu");
+  setText("d-saldo", fmt(saldo));
+  const saldoEl = el("d-saldo");
+  saldoEl.className = "kv " + (saldo >= 0 ? "green" : "red");
+  saldoEl.style.cssText = "font-size:30px;margin-top:4px";
+
+  setText("sb-pct", pct.toFixed(1) + "% comprometido");
+  setText("sb-lbl", isProj ? "⚠️ Projeção (parcelados)" : isEmpty ? "Sem lançamentos ainda" : "Comprometido");
+  const bar = el("sbfill");
+  bar.style.width = Math.max(pct,2) + "%";
+  bar.style.background = pct > 90 ? "var(--rd)" : pct > 70 ? "var(--am)" : "var(--gn)";
+  el("saldo-card").style.borderStyle = isProj ? "dashed" : "";
+
+  renderRendaExtra(mes);
+
+  // ── TOTALIZADORES DO MÊS (reformulados) ──
+  const porCat = {};
+  dados.forEach(r => porCat[r.cat] = (porCat[r.cat]||0) + minhaParteVal(r));
+  const nCats = Object.keys(porCat).length;
+  const topCatEntry = Object.entries(porCat).sort((a,b)=>b[1]-a[1])[0];
+
+  // comparação com mês anterior
+  const idxAtual = mesIdx(mes);
+  const mesAnterior = idxAtual > 0 ? MESES_SEQ[idxAtual-1] : null;
+  const gastoAnterior = mesAnterior ? sumMinha(byM(mesAnterior)) : null;
+  let varTxt = "—", varCls = "";
+  if (gastoAnterior && gastoAnterior > 0) {
+    const variac = ((meuGasto - gastoAnterior) / gastoAnterior) * 100;
+    varTxt = (variac >= 0 ? "▲ " : "▼ ") + Math.abs(variac).toFixed(1) + "%";
+    varCls = variac >= 0 ? "red" : "green";
+  }
+
+  setText("d-ncats", nCats);
+  setText("d-topcat-val", topCatEntry ? fmtK(topCatEntry[1]) : "—");
+  setText("d-topcat-nome", topCatEntry ? (CE[topCatEntry[0]]||"") + " " + topCatEntry[0] : "Nenhum gasto");
+  setText("d-nlanc", dados.length);
+  const varEl = el("d-var");
+  varEl.textContent = varTxt;
+  varEl.className = "kv " + varCls;
+  setText("d-var-sub", mesAnterior ? "vs " + mesLabel(mesAnterior) : "sem comparação");
+
+  // a receber neste mês especificamente
+  const devMes = calcDevedores(dados);
+  const totReceberMes = Object.values(devMes).reduce((a,d)=>a+d.total, 0);
+  setText("d-areceber-mes", fmtK(totReceberMes));
+
+  // Top categorias do mês (lista visual)
+  const contCats = el("d-topcats");
+  contCats.innerHTML = "";
+  if (!nCats) {
+    contCats.innerHTML = '<div class="empty">Nenhum gasto lançado neste mês ainda</div>';
+  } else {
+    Object.entries(porCat).sort((a,b) => b[1]-a[1]).slice(0,6).forEach(([cat,val], i) => {
+      const p = meuGasto > 0 ? val/meuGasto*100 : 0;
+      const d = document.createElement("div");
+      d.innerHTML = `<div class="cb-top"><span class="cb-name">${CE[cat]||"•"} ${cat}</span>
+        <div class="cb-right"><span class="cb-val">${fmt(val)}</span><span class="cb-pct">${p.toFixed(1)}%</span></div></div>
+        <div class="cbbg"><div class="cbfill" style="width:${p}%;background:${PAL[i%PAL.length]}"></div></div>`;
+      contCats.appendChild(d);
+    });
+  }
+
+  // ── GRÁFICO: Gastos diários acumulados no mês (foco mensal de verdade) ──
+  renderChartDiario(mes, dados);
+
+  // ── GRÁFICO: histórico mensal (linha simples, secundário) ──
+  renderChartHistorico(mes);
+
+  // Cartões do mês
+  renderChartCartaoMes(dados);
+}
+
+function renderChartDiario(mes, dados) {
+  // Agrupa por dia do mês (data) — gasto acumulado dia a dia
+  const porDia = {};
+  dados.forEach(r => {
+    const dia = r.data ? r.data.split("-")[2] : "01";
+    porDia[dia] = (porDia[dia]||0) + minhaParteVal(r);
+  });
+  const dias = Object.keys(porDia).sort((a,b)=>a-b);
+  let acumulado = 0;
+  const dataAcum = dias.map(d => { acumulado += porDia[d]; return r2(acumulado); });
+
+  if (chInst.diario) chInst.diario.destroy();
+  if (!dias.length) {
+    el("ch-diario").style.display = "none";
+    el("ch-diario-empty").style.display = "block";
+    return;
+  }
+  el("ch-diario").style.display = "block";
+  el("ch-diario-empty").style.display = "none";
+
+  chInst.diario = new Chart(el("ch-diario"), {
+    type: "line",
+    data: {
+      labels: dias.map(d => "Dia " + d),
+      datasets: [{
+        label: "Acumulado no mês",
+        data: dataAcum,
+        borderColor: "#7C6AF5",
+        backgroundColor: "rgba(124,106,245,0.12)",
+        borderWidth: 2.5,
+        pointRadius: 3,
+        pointBackgroundColor: "#7C6AF5",
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display:false },
+        tooltip: { callbacks: { label: ctx => "Acumulado: " + fmt(ctx.raw) } }
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{color:"#5A5975",font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8} },
+        y: { grid:{color:"#2A2A36"}, ticks:{color:"#5A5975",font:{size:10},callback:v=>fmtK(v)}, border:{display:false} }
+      }
+    }
+  });
+}
+
+function renderChartHistorico(mesSel) {
+  const ativos = getMesesAtivos();
+  const gastosMes = ativos.map(k => sumMinha(byM(k)));
+  const isP = ativos.map(k => byM(k).every(r => r.proj));
+
+  if (chInst.hist) chInst.hist.destroy();
+  chInst.hist = new Chart(el("ch-historico"), {
+    type: "bar",
+    data: {
+      labels: ativos.map(mesLabel),
+      datasets: [{
+        label: "Meus gastos",
+        data: gastosMes,
+        backgroundColor: ativos.map((k,i) => k===mesSel ? "#7C6AF5" : isP[i] ? "rgba(124,106,245,0.18)" : "rgba(124,106,245,0.35)"),
+        borderRadius: 6, borderSkipped: false,
+        borderColor: ativos.map((_,i) => isP[i] ? "rgba(124,106,245,0.5)" : "transparent"),
+        borderWidth: ativos.map((_,i) => isP[i] ? 1 : 0),
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      onClick: (evt, items) => {
+        if (items.length) { const k = ativos[items[0].index]; navTo("dash"); renderDash(k); }
+      },
+      plugins: {
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}
+      },
+      scales: {
+        x:{grid:{display:false},ticks:{color:"#5A5975",font:{size:9}}},
+        y:{grid:{color:"#2A2A36"},ticks:{color:"#5A5975",font:{size:9},callback:v=>fmtK(v)},border:{display:false}}
+      }
+    }
+  });
+}
+
+function renderChartCartaoMes(dados) {
+  const porC = {};
+  dados.forEach(r => {
+    const k = r.cartao || r.pgto || "Outros";
+    porC[k] = (porC[k]||0) + minhaParteVal(r);
+  });
+  const cS = Object.entries(porC).sort((a,b) => b[1]-a[1]);
+  if (chInst.cartao) chInst.cartao.destroy();
+  if (!cS.length) {
+    el("ch-cartao").style.display = "none";
+    el("ch-cartao-empty").style.display = "block";
+    return;
+  }
+  el("ch-cartao").style.display = "block";
+  el("ch-cartao-empty").style.display = "none";
+  chInst.cartao = new Chart(el("ch-cartao"), {
+    type: "bar",
+    data: { labels: cS.map(e=>e[0]), datasets: [{ data:cS.map(e=>e[1]), backgroundColor: PAL, borderRadius:6, borderSkipped:false }] },
+    options: {
+      indexAxis:"y", responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},
+      scales:{
+        x:{grid:{color:"#2A2A36"},ticks:{color:"#5A5975",font:{size:10},callback:v=>fmtK(v)},border:{display:false}},
+        y:{grid:{display:false},ticks:{color:"#9B9AB8",font:{size:11}}}
+      }
+    }
+  });
+}
+
+function renderRendaExtra(mes) {
+  const extras = S.rendaExtra[mes] || [];
+  const listEl = el("re-list"), emptyEl = el("re-empty");
+  if (!extras.length) { listEl.innerHTML = ""; emptyEl.style.display = "block"; return; }
+  emptyEl.style.display = "none";
+  listEl.innerHTML = extras.map((r,i) =>
+    `<div class="re-row"><div class="re-item"><span>${escHtml(r.desc)}</span>
+    <span style="color:var(--gn);font-weight:700">+${fmt(r.val)}</span></div>
+    <button class="re-del" onclick="delRendaExtra('${mes}',${i})">✕</button></div>`
+  ).join("");
+}
+
+function openRendaModal() {
+  const s = el("re-mes"); s.innerHTML = "";
+  const ativos = getMesesAtivos();
+  ativos.forEach(k => {
+    const o = document.createElement("option"); o.value=k; o.text=mesLabel(k);
+    if (k===selDash) o.selected=true;
+    s.appendChild(o);
+  });
+  el("m-renda").classList.add("on");
+  setTimeout(() => el("re-desc").focus(), 250);
+}
+function closeRendaModal() { el("m-renda").classList.remove("on"); }
+
+function salvarRendaExtra() {
+  const desc = el("re-desc").value.trim();
+  const val = parseFloat(el("re-val").value);
+  const mes = el("re-mes").value;
+  if (!desc || !val) { toast("Preencha descrição e valor"); return; }
+  if (!S.rendaExtra[mes]) S.rendaExtra[mes] = [];
+  S.rendaExtra[mes].push({ desc, val });
+  saveSt(); closeRendaModal();
+  el("re-desc").value = ""; el("re-val").value = "";
+  renderDash(selDash); toast("✓ Renda extra adicionada!");
+}
+function delRendaExtra(mes, i) {
+  S.rendaExtra[mes].splice(i, 1);
+  saveSt(); renderDash(selDash); toast("Removido");
+}
+
+// ══════════════════════════════════════════════════
+// REEMBOLSOS — visão mês a mês
+// ══════════════════════════════════════════════════
+let selReimb = mesAtual();
+
+function initReimbStrip() {
+  buildMonthStrip("ms-reimb", selReimb, getMesesAtivos(), 6, k => { selReimb = k; renderReimb(k); });
+}
+
+function chaveRecebido(mes, pessoa) { return mes + "::" + pessoa; }
+
+function renderReimb(mes) {
+  selReimb = mes;
+  initReimbStrip();
+  setText("reimb-mesnome", mesLabel(mes));
+
+  const dados = byM(mes);
+  const devedores = calcDevedores(dados);
+
+  // Subtrair o que já foi marcado como recebido NESTE mês
+  const recebidosMes = (S.reembolsosPagos||[]).filter(r => r.mesRef === mes);
+  recebidosMes.forEach(rp => {
+    if (devedores[rp.pessoa]) devedores[rp.pessoa].total -= rp.val;
+  });
+
+  const sorted = Object.entries(devedores)
+    .filter(([,d]) => Math.abs(d.total) > 0.01)
+    .sort((a,b) => b[1].total - a[1].total);
+
+  const totalMes = sorted.reduce((a,[,d]) => a + Math.max(d.total,0), 0);
+  setText("reimb-total-mes", fmt(totalMes));
+
+  // Total GERAL (todos os meses, considerando recebimentos)
+  const devGeral = calcDevedores(S.lancamentos);
+  (S.reembolsosPagos||[]).forEach(rp => {
+    if (devGeral[rp.pessoa]) devGeral[rp.pessoa].total -= rp.val;
+  });
+  const totalGeral = Object.values(devGeral).reduce((a,d)=>a+Math.max(d.total,0), 0);
+  setText("reimb-total-geral", fmt(totalGeral));
+
+  const cont = el("reimb-cards");
+  cont.innerHTML = "";
+
+  if (!sorted.length) {
+    cont.innerHTML = `<div class="empty">Nenhum reembolso pendente em ${mesLabel(mes)} 🎉</div>`;
+  } else {
+    sorted.forEach(([pessoa, dadosP], i) => {
+      if (dadosP.total <= 0.01) return;
+      const col = RCOL[i % RCOL.length];
+      const ini = pessoa.slice(0,2).toUpperCase();
+      const d = document.createElement("div");
+      d.className = "rcard";
+      const itemsHtml = dadosP.items.slice(0,6).map(it =>
+        `<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--b1)">
+          <span style="color:var(--su)">${escHtml(it.desc)}</span>
+          <span style="font-weight:600">${fmt(it._deve)}</span>
+        </div>`
+      ).join("");
+      d.innerHTML = `<div class="rcard-hd">
+          <div class="rav" style="background:${col}22;color:${col}">${ini}</div>
+          <div style="flex:1"><div class="rnm">${escHtml(pessoa)}</div>
+            <div class="rtot" style="color:${col}">deve ${fmt(dadosP.total)} em ${mesLabel(mes)}</div></div>
+        </div>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:2px">${itemsHtml}</div>
+        <button class="btn-reimb" data-p="${escHtml(pessoa)}" data-v="${dadosP.total.toFixed(2)}" data-m="${mes}"
+          onclick="marcarRecebido(this)"
+          style="margin-top:10px;width:100%;padding:9px;border-radius:8px;border:1px solid rgba(52,211,153,.3);
+          background:rgba(52,211,153,.1);color:var(--gn);font-size:12px;font-weight:700;font-family:var(--ff);cursor:pointer">
+          ✓ Marcar como recebido
+        </button>`;
+      cont.appendChild(d);
+    });
+  }
+
+  // Histórico de recebimentos deste mês
+  const histEl = el("reimb-hist");
+  if (recebidosMes.length) {
+    histEl.innerHTML = recebidosMes.slice().reverse().map(rp =>
+      `<div class="li" style="margin-bottom:4px">
+        <div class="li-ico">✅</div>
+        <div class="li-body"><div class="li-desc">${escHtml(rp.pessoa)}</div>
+        <div class="li-meta">recebido em ${rp.dataRecebido}</div></div>
+        <div class="li-r"><div class="li-val green">${fmt(rp.val)}</div></div></div>`
+    ).join("");
+  } else {
+    histEl.innerHTML = '<div class="empty" style="padding:12px;font-size:11px">Nenhum recebimento neste mês</div>';
+  }
+
+  // Mini gráfico: quem deve mais (consolidado, todos os meses)
+  renderChartReimbGeral();
+}
+
+function marcarRecebido(btn) {
+  const pessoa = btn.dataset.p;
+  const valSugerido = parseFloat(btn.dataset.v);
+  const mesRef = btn.dataset.m;
+  const input = prompt(`Confirmar valor recebido de ${pessoa} (ref. ${mesLabel(mesRef)}):`, valSugerido.toFixed(2));
+  if (input === null) return;
+  const v = parseFloat(input.replace(",", "."));
+  if (!v || v <= 0) { toast("Valor inválido"); return; }
+  if (!S.reembolsosPagos) S.reembolsosPagos = [];
+  S.reembolsosPagos.push({
+    pessoa, val: v, mesRef,
+    dataRecebido: new Date().toLocaleDateString('pt-BR')
+  });
+  saveSt();
+  renderReimb(selReimb);
+  toast(`✓ ${fmt(v)} recebido de ${pessoa}!`);
+}
+
+function renderChartReimbGeral() {
+  const devGeral = calcDevedores(S.lancamentos);
+  (S.reembolsosPagos||[]).forEach(rp => {
+    if (devGeral[rp.pessoa]) devGeral[rp.pessoa].total -= rp.val;
+  });
+  const sorted = Object.entries(devGeral)
+    .filter(([,d]) => d.total > 0.01)
+    .sort((a,b) => b[1].total - a[1].total);
+
+  if (chInst.reimb) chInst.reimb.destroy();
+  const canvasEl = el("ch-reimb-geral");
+  if (!canvasEl) return;
+  if (!sorted.length) {
+    canvasEl.style.display = "none";
+    el("ch-reimb-geral-empty").style.display = "block";
+    return;
+  }
+  canvasEl.style.display = "block";
+  el("ch-reimb-geral-empty").style.display = "none";
+  chInst.reimb = new Chart(canvasEl, {
+    type: "bar",
+    data: {
+      labels: sorted.map(s=>s[0]),
+      datasets: [{ data: sorted.map(s=>s[1].total), backgroundColor: RCOL, borderRadius:6, borderSkipped:false }]
+    },
+    options: {
+      indexAxis:"y", responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},
+      scales:{
+        x:{grid:{color:"#2A2A36"},ticks:{color:"#5A5975",font:{size:10},callback:v=>fmtK(v)},border:{display:false}},
+        y:{grid:{display:false},ticks:{color:"#9B9AB8",font:{size:11}}}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+// INVESTIMENTOS — gestão de CDB, CDI, Tesouro etc.
+// ══════════════════════════════════════════════════
+// Estrutura de cada investimento:
+// { id, banco, tipo, valorAplicado, dataAplicacao, percentualCDI/taxa,
+//   rendimentos: [{data, valor}], ativo: true/false }
+
+function populateInvForm() {
+  const setOpts = (id, arr) => {
+    const e = el(id); e.innerHTML = "";
+    arr.forEach(v => { const o=document.createElement("option"); o.value=v; o.text=v; e.appendChild(o); });
+  };
+  setOpts("inv-banco", S.cfg.bancos);
+  setOpts("inv-tipo", S.cfg.tiposInv);
+  el("inv-data").value = new Date().toISOString().split("T")[0];
+}
+
+function salvarInvestimento() {
+  const banco = el("inv-banco").value;
+  const tipo = el("inv-tipo").value;
+  const desc = el("inv-desc").value.trim();
+  const valor = parseFloat(el("inv-valor").value);
+  const data = el("inv-data").value;
+  const taxa = el("inv-taxa").value.trim();
+  const vencimento = el("inv-vencimento").value;
+
+  if (!banco || !tipo || !valor || !data) { toast("⚠️ Preencha banco, tipo, valor e data"); return; }
+
+  const novo = {
+    id: uid(), banco, tipo, desc: desc || (tipo + " " + banco),
+    valorAplicado: r2(valor), dataAplicacao: data, taxa, vencimento,
+    rendimentos: [], ativo: true, dataResgate: null, valorResgate: null
+  };
+  S.investimentos.unshift(novo);
+  saveSt();
+
+  el("inv-desc").value = ""; el("inv-valor").value = "";
+  el("inv-taxa").value = ""; el("inv-vencimento").value = "";
+  el("inv-data").value = new Date().toISOString().split("T")[0];
+
+  renderInvList();
+  renderInvResumo();
+  toast("✓ Investimento registrado!");
+}
+
+function calcRendimentoTotal(inv) {
+  return inv.rendimentos.reduce((a,r) => a + r.valor, 0);
+}
+function calcValorAtual(inv) {
+  return inv.valorAplicado + calcRendimentoTotal(inv);
+}
+function calcRentabilidadePct(inv) {
+  if (inv.valorAplicado === 0) return 0;
+  return (calcRendimentoTotal(inv) / inv.valorAplicado) * 100;
+}
+function diasAplicado(inv) {
+  const d1 = new Date(inv.dataAplicacao);
+  const d2 = inv.dataResgate ? new Date(inv.dataResgate) : new Date();
+  return Math.max(1, Math.round((d2 - d1) / 86400000));
+}
+
+function renderInvResumo() {
+  const ativos = S.investimentos.filter(i => i.ativo);
+  const resgatados = S.investimentos.filter(i => !i.ativo);
+
+  const totalAplicado = sumArr(ativos, i => i.valorAplicado);
+  const totalRendimento = sumArr(ativos, i => calcRendimentoTotal(i));
+  const totalAtual = totalAplicado + totalRendimento;
+  const totalResgatado = sumArr(resgatados, i => i.valorResgate || 0);
+  const lucroResgatado = sumArr(resgatados, i => (i.valorResgate||0) - i.valorAplicado);
+
+  setText("inv-total-aplicado", fmt(totalAplicado));
+  setText("inv-total-rendimento", fmt(totalRendimento));
+  setText("inv-total-atual", fmt(totalAtual));
+  setText("inv-rentab-media", totalAplicado > 0 ? (totalRendimento/totalAplicado*100).toFixed(2) + "%" : "0%");
+  setText("inv-qtd-ativos", ativos.length);
+  setText("inv-total-resgatado", fmt(totalResgatado));
+  setText("inv-lucro-resgatado", fmt(lucroResgatado));
+
+  // Distribuição por tipo
+  const porTipo = {};
+  ativos.forEach(i => porTipo[i.tipo] = (porTipo[i.tipo]||0) + calcValorAtual(i));
+  if (chInst.invTipo) chInst.invTipo.destroy();
+  const tipoEntries = Object.entries(porTipo).sort((a,b)=>b[1]-a[1]);
+  const canvasTipo = el("ch-inv-tipo");
+  if (tipoEntries.length && canvasTipo) {
+    canvasTipo.style.display = "block";
+    el("ch-inv-tipo-empty").style.display = "none";
+    chInst.invTipo = new Chart(canvasTipo, {
+      type: "doughnut",
+      data: { labels: tipoEntries.map(e=>e[0]),
+        datasets:[{data:tipoEntries.map(e=>e[1]),backgroundColor:PAL,borderWidth:0,hoverOffset:5}] },
+      options: { responsive:true, maintainAspectRatio:false, cutout:"58%",
+        plugins:{legend:{position:"right",labels:{color:"#9B9AB8",font:{size:10},boxWidth:9,padding:6}},
+          tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}} }
+    });
+  } else if (canvasTipo) {
+    canvasTipo.style.display = "none";
+    el("ch-inv-tipo-empty").style.display = "block";
+  }
+
+  // Distribuição por banco
+  const porBanco = {};
+  ativos.forEach(i => porBanco[i.banco] = (porBanco[i.banco]||0) + calcValorAtual(i));
+  if (chInst.invBanco) chInst.invBanco.destroy();
+  const bancoEntries = Object.entries(porBanco).sort((a,b)=>b[1]-a[1]);
+  const canvasBanco = el("ch-inv-banco");
+  if (bancoEntries.length && canvasBanco) {
+    canvasBanco.style.display = "block";
+    el("ch-inv-banco-empty").style.display = "none";
+    chInst.invBanco = new Chart(canvasBanco, {
+      type: "bar",
+      data: { labels: bancoEntries.map(e=>e[0]),
+        datasets:[{data:bancoEntries.map(e=>e[1]),backgroundColor:PAL,borderRadius:6,borderSkipped:false}] },
+      options: { indexAxis:"y", responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)}}},
+        scales:{x:{grid:{color:"#2A2A36"},ticks:{color:"#5A5975",font:{size:10},callback:v=>fmtK(v)},border:{display:false}},
+          y:{grid:{display:false},ticks:{color:"#9B9AB8",font:{size:11}}}} }
+    });
+  } else if (canvasBanco) {
+    canvasBanco.style.display = "none";
+    el("ch-inv-banco-empty").style.display = "block";
+  }
+
+  // Evolução do rendimento acumulado (todos os investimentos, por data de lançamento de rendimento)
+  renderChartEvolucaoInv(ativos);
+}
+
+function sumArr(arr, fn) { return arr.reduce((a,x) => a + fn(x), 0); }
+
+function renderChartEvolucaoInv(ativos) {
+  // Agrupar todos os rendimentos por data
+  const porData = {};
+  ativos.forEach(inv => {
+    inv.rendimentos.forEach(r => {
+      porData[r.data] = (porData[r.data]||0) + r.valor;
+    });
+  });
+  const datas = Object.keys(porData).sort();
+  let acum = 0;
+  const acumData = datas.map(d => { acum += porData[d]; return r2(acum); });
+
+  if (chInst.invEvol) chInst.invEvol.destroy();
+  const canvasEl = el("ch-inv-evolucao");
+  if (!canvasEl) return;
+  if (!datas.length) {
+    canvasEl.style.display = "none";
+    el("ch-inv-evolucao-empty").style.display = "block";
+    return;
+  }
+  canvasEl.style.display = "block";
+  el("ch-inv-evolucao-empty").style.display = "none";
+  chInst.invEvol = new Chart(canvasEl, {
+    type: "line",
+    data: {
+      labels: datas.map(d => { const p=d.split("-"); return p[2]+"/"+p[1]; }),
+      datasets: [{
+        label: "Rendimento acumulado",
+        data: acumData,
+        borderColor: "#34D399", backgroundColor: "rgba(52,211,153,0.12)",
+        borderWidth: 2.5, pointRadius: 2, fill: true, tension: 0.25
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>"Rendimento: "+fmt(ctx.raw)}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:"#5A5975",font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8}},
+        y:{grid:{color:"#2A2A36"},ticks:{color:"#5A5975",font:{size:10},callback:v=>fmtK(v)},border:{display:false}}
+      }
+    }
+  });
+}
+
+function renderInvList() {
+  const cont = el("inv-list");
+  const ativos = S.investimentos.filter(i => i.ativo);
+  cont.innerHTML = "";
+  if (!ativos.length) {
+    cont.innerHTML = '<div class="empty">Nenhum investimento ativo. Registre o primeiro acima! 📈</div>';
+    return;
+  }
+  ativos.forEach(inv => {
+    const rendimento = calcRendimentoTotal(inv);
+    const valorAtual = calcValorAtual(inv);
+    const pct = calcRentabilidadePct(inv);
+    const dias = diasAplicado(inv);
+    const d = document.createElement("div");
+    d.className = "inv-card";
+    d.innerHTML = `
+      <div class="inv-hd">
+        <div>
+          <div class="inv-banco">${escHtml(inv.banco)}</div>
+          <div class="inv-tipo-tag">${escHtml(inv.tipo)}${inv.taxa ? " · "+escHtml(inv.taxa) : ""}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="inv-valor-atual">${fmt(valorAtual)}</div>
+          <div class="inv-pct ${pct>=0?'green':'red'}">${pct>=0?'+':''}${pct.toFixed(2)}%</div>
+        </div>
+      </div>
+      <div class="inv-desc">${escHtml(inv.desc)}</div>
+      <div class="inv-meta-row">
+        <span>Aplicado: ${fmt(inv.valorAplicado)}</span>
+        <span>Rendeu: <b class="green">${fmt(rendimento)}</b></span>
+        <span>${dias} dias</span>
+      </div>
+      <div class="inv-actions">
+        <button class="btn-sm-inv" onclick="openRendModal('${inv.id}')">+ Rendimento</button>
+        <button class="btn-sm-inv" onclick="toggleInvHist('${inv.id}')">📊 Histórico</button>
+        <button class="btn-sm-inv resgate" onclick="openResgateModal('${inv.id}')">💸 Resgatar</button>
+      </div>
+      <div class="inv-hist" id="inv-hist-${inv.id}" style="display:none"></div>
+    `;
+    cont.appendChild(d);
+  });
+
+  renderInvResgatados();
+}
+
+function toggleInvHist(id) {
+  const histEl = el("inv-hist-" + id);
+  if (histEl.style.display === "block") { histEl.style.display = "none"; return; }
+  const inv = S.investimentos.find(i => i.id === id);
+  if (!inv.rendimentos.length) {
+    histEl.innerHTML = '<div class="empty" style="padding:10px;font-size:11px">Nenhum rendimento lançado ainda</div>';
+  } else {
+    histEl.innerHTML = inv.rendimentos.slice().reverse().map((r,i) => {
+      const origIdx = inv.rendimentos.length - 1 - i;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:6px 0;border-bottom:1px solid var(--b1)">
+        <span style="color:var(--su)">${r.data.split('-').reverse().join('/')}</span>
+        <span style="font-weight:600;color:var(--gn)">+${fmt(r.valor)}</span>
+        <button onclick="delRendimento('${id}',${origIdx})" style="background:transparent;border:none;color:var(--mu);cursor:pointer;font-size:13px">✕</button>
+      </div>`;
+    }).join("");
+  }
+  histEl.style.display = "block";
+}
+
+let rendModalInvId = null;
+function openRendModal(invId) {
+  rendModalInvId = invId;
+  el("rend-data").value = new Date().toISOString().split("T")[0];
+  el("rend-valor").value = "";
+  el("m-rend").classList.add("on");
+  setTimeout(() => el("rend-valor").focus(), 250);
+}
+function closeRendModal() { el("m-rend").classList.remove("on"); }
+function salvarRendimento() {
+  const valor = parseFloat(el("rend-valor").value);
+  const data = el("rend-data").value;
+  if (!valor || !data) { toast("Preencha valor e data"); return; }
+  const inv = S.investimentos.find(i => i.id === rendModalInvId);
+  if (!inv) return;
+  inv.rendimentos.push({ data, valor: r2(valor) });
+  saveSt();
+  closeRendModal();
+  renderInvList();
+  renderInvResumo();
+  toast("✓ Rendimento de " + fmt(valor) + " lançado!");
+}
+function delRendimento(invId, idx) {
+  const inv = S.investimentos.find(i => i.id === invId);
+  if (!inv) return;
+  inv.rendimentos.splice(idx, 1);
+  saveSt();
+  renderInvList();
+  renderInvResumo();
+  toast("Removido");
+}
+
+let resgateModalInvId = null;
+function openResgateModal(invId) {
+  resgateModalInvId = invId;
+  const inv = S.investimentos.find(i => i.id === invId);
+  el("resgate-valor").value = calcValorAtual(inv).toFixed(2);
+  el("resgate-data").value = new Date().toISOString().split("T")[0];
+  el("m-resgate").classList.add("on");
+}
+function closeResgateModal() { el("m-resgate").classList.remove("on"); }
+function confirmarResgate() {
+  const valor = parseFloat(el("resgate-valor").value);
+  const data = el("resgate-data").value;
+  if (!valor || !data) { toast("Preencha valor e data"); return; }
+  const inv = S.investimentos.find(i => i.id === resgateModalInvId);
+  if (!inv) return;
+  inv.ativo = false;
+  inv.dataResgate = data;
+  inv.valorResgate = r2(valor);
+  saveSt();
+  closeResgateModal();
+  renderInvList();
+  renderInvResumo();
+  toast("✓ Resgate de " + fmt(valor) + " confirmado!");
+}
+
+function renderInvResgatados() {
+  const cont = el("inv-resgatados");
+  const resgatados = S.investimentos.filter(i => !i.ativo);
+  if (!resgatados.length) {
+    cont.innerHTML = '<div class="empty" style="padding:12px;font-size:11px">Nenhum investimento resgatado ainda</div>';
+    return;
+  }
+  cont.innerHTML = resgatados.map(inv => {
+    const lucro = (inv.valorResgate||0) - inv.valorAplicado;
+    const pct = inv.valorAplicado > 0 ? (lucro/inv.valorAplicado*100) : 0;
+    return `<div class="li" style="margin-bottom:4px">
+      <div class="li-ico">💸</div>
+      <div class="li-body"><div class="li-desc">${escHtml(inv.desc)}</div>
+      <div class="li-meta">${escHtml(inv.banco)} · resgatado em ${inv.dataResgate ? inv.dataResgate.split('-').reverse().join('/') : ''}</div></div>
+      <div class="li-r"><div class="li-val ${lucro>=0?'green':'red'}">${lucro>=0?'+':''}${fmt(lucro)}</div>
+      <div class="li-sub">${pct.toFixed(1)}%</div></div></div>`;
+  }).join("");
+}
+
+// ══════════════════════════════════════════════════
+// LANÇAMENTOS — lista filtrável
+// ══════════════════════════════════════════════════
+let lFil = [], lPg = 0;
+const PP = 40;
+
+function populateLancFiltros() {
+  const fill = (id, arr, lbl) => {
+    const s = el(id); s.innerHTML = `<option value="">${lbl}</option>`;
+    arr.forEach(v => { const o=document.createElement("option"); o.value=v; o.text=v; s.appendChild(o); });
+  };
+  const ativos = getMesesAtivos();
+  const lm = el("l-mes"); lm.innerHTML = '<option value="">Todos meses</option>';
+  ativos.forEach(k => { const o=document.createElement("option"); o.value=k; o.text=mesLabel(k); lm.appendChild(o); });
+  fill("l-cat", [...new Set(S.lancamentos.map(r=>r.cat))].sort(), "Todas categorias");
+  fill("l-resp", [...new Set(S.lancamentos.map(r=>r.resp))].sort(), "Todos responsáveis");
+  fill("l-cartao", [...new Set(S.lancamentos.map(r=>r.cartao||r.pgto))].sort(), "Todos cartões");
+}
+
+function rLanc() {
+  const q = el("l-q").value.toLowerCase();
+  const mes = el("l-mes").value;
+  const cat = el("l-cat").value;
+  const resp = el("l-resp").value;
+  const cartao = el("l-cartao").value;
+  const tipo = el("l-tipo").value;
+  lFil = S.lancamentos.filter(r => {
+    if (mes && r.mes!==mes) return false;
+    if (cat && r.cat!==cat) return false;
+    if (resp && r.resp!==resp) return false;
+    if (cartao && (r.cartao||r.pgto)!==cartao) return false;
+    if (tipo==="real" && r.proj) return false;
+    if (tipo==="proj" && !r.proj) return false;
+    if (q && !r.desc.toLowerCase().includes(q) && !r.cat.toLowerCase().includes(q)) return false;
+    return true;
+  }).sort((a,b) => mesIdx(b.mes)-mesIdx(a.mes));
+  lPg = 0;
+  setText("l-cnt", lFil.length+" lançamentos");
+  setText("l-tot", fmt(sumV(lFil)));
+  setText("l-tot-minha", "Minha parte: " + fmt(sumMinha(lFil)));
+  rLancPg();
+}
+
+function rLancPg() {
+  const list = el("l-list"); list.innerHTML = "";
+  const slice = lFil.slice(0, (lPg+1)*PP);
+  if (!slice.length) { list.innerHTML='<div class="empty">Nenhum lançamento encontrado</div>'; return; }
+  let prevMes = null;
+  slice.forEach(r => {
+    if (r.mes !== prevMes) {
+      prevMes = r.mes;
+      const sep = document.createElement("div");
+      sep.className = "li-sep";
+      sep.textContent = mesLabel(r.mes) + (r.proj ? " — projeção" : " — real");
+      list.appendChild(sep);
+    }
+    const cl = r.cartao && r.cartao!==r.pgto ? r.cartao : (r.pgto||"—");
+    const minhaParte = minhaParteVal(r);
+    const isShared = r.resp.includes("/");
+    const d = document.createElement("div");
+    d.className = "li" + (r.proj?" pj":"");
+    d.innerHTML = `<div class="li-ico">${CE[r.cat]||"📦"}</div>
+      <div class="li-body"><div class="li-desc">${escHtml(r.desc)}</div>
+      <div class="li-meta">${escHtml(r.cat)} · ${escHtml(r.resp)} · ${escHtml(cl)}</div></div>
+      <div class="li-r"><div class="li-val">${fmt(r.val)}</div>
+      <div class="li-sub">${isShared ? "sua: "+fmt(minhaParte) : (r.parcela && r.parcela!=="1/1" ? r.parcela : mesLabel(r.mes))}</div></div>
+      <button class="li-del" onclick="delLanc(event,'${r.id}','${r.grupoId||''}')">&times;</button>`;
+    list.appendChild(d);
+  });
+  el("l-more").style.display = slice.length<lFil.length ? "block" : "none";
+}
+function lMore() { lPg++; rLancPg(); }
+
+function delLanc(e, id, grupoId) {
+  e.stopPropagation();
+  const grupo = grupoId ? S.lancamentos.filter(r=>r.grupoId===grupoId) : [];
+  if (grupo.length > 1) {
+    const all = confirm(`Parcelado com ${grupo.length} parcelas. Remover TODAS?`);
+    if (all) S.lancamentos = S.lancamentos.filter(r=>r.grupoId!==grupoId);
+    else if (confirm("Remover só esta parcela?")) S.lancamentos = S.lancamentos.filter(r=>r.id!==id);
+    else return;
+  } else {
+    if (!confirm("Remover este lançamento?")) return;
+    S.lancamentos = S.lancamentos.filter(r=>r.id!==id);
+  }
+  saveSt(); populateLancFiltros(); rLanc(); toast("Removido");
+}
+
+// ══════════════════════════════════════════════════
+// RESPONSÁVEIS
+// ══════════════════════════════════════════════════
+let selResp = mesAtual();
+
+function initRespStrip() {
+  buildMonthStrip("ms-resp", selResp, getMesesAtivos(), 3, k => { selResp = k; rResp(); });
+}
+
+function rResp() {
+  initRespStrip();
+  const rcat = el("r-cat").value;
+  const rcartao = el("r-cartao").value;
+  if (el("r-cat").options.length === 1) {
+    [...new Set(S.lancamentos.map(r=>r.cat))].sort().forEach(c => {
+      const o=document.createElement("option"); o.value=c; o.text=c; el("r-cat").appendChild(o);
+    });
+    [...new Set(S.lancamentos.map(r=>r.cartao||r.pgto))].sort().forEach(c => {
+      const o=document.createElement("option"); o.value=c; o.text=c; el("r-cartao").appendChild(o);
+    });
+  }
+  let dados = byM(selResp);
+  if (rcat) dados=dados.filter(r=>r.cat===rcat);
+  if (rcartao) dados=dados.filter(r=>(r.cartao||r.pgto)===rcartao);
+
+  const porResp = {};
+  dados.forEach(r => porResp[r.resp]=(porResp[r.resp]||0)+r.val);
+  const sorted = Object.entries(porResp).sort((a,b)=>b[1]-a[1]);
+  const total = sumV(dados);
+
+  if (chInst.rpizza) chInst.rpizza.destroy();
+  const canvasPizza = el("ch-rpizza");
+  if (sorted.length) {
+    canvasPizza.style.display = "block";
+    el("ch-rpizza-empty").style.display = "none";
+    chInst.rpizza = new Chart(canvasPizza, {
+      type:"doughnut",
+      data:{ labels:sorted.map(s=>s[0]), datasets:[{data:sorted.map(s=>s[1]),backgroundColor:RCOL,borderWidth:0,hoverOffset:5}] },
+      options:{responsive:true,maintainAspectRatio:false,cutout:"55%",
+        plugins:{legend:{position:"right",labels:{color:"#9B9AB8",font:{size:10},boxWidth:10,padding:8}},
+          tooltip:{callbacks:{label:ctx=>fmt(ctx.raw)+" ("+(ctx.raw/total*100).toFixed(1)+"%)"}}}}
+    });
+  } else {
+    canvasPizza.style.display = "none";
+    el("ch-rpizza-empty").style.display = "block";
+  }
+
+  const cards = el("r-cards"); cards.innerHTML="";
+  if (!sorted.length) { cards.innerHTML = '<div class="empty">Nenhum gasto neste mês com esses filtros</div>'; return; }
+  sorted.forEach(([resp,val],i) => {
+    const pct = total>0 ? val/total*100 : 0;
+    const catR = {};
+    dados.filter(r=>r.resp===resp).forEach(r=>catR[r.cat]=(catR[r.cat]||0)+r.val);
+    const topC = Object.entries(catR).sort((a,b)=>b[1]-a[1]).slice(0,4);
+    const ini = resp.replace("/","").slice(0,2) || resp[0];
+    const col = RCOL[i%RCOL.length];
+    const d = document.createElement("div"); d.className = "rcard";
+    d.innerHTML = `<div class="rcard-hd">
+      <div class="rav" style="background:${col}22;color:${col}">${ini}</div>
+      <div><div class="rnm">${escHtml(resp)}</div><div class="rtot" style="color:${col}">${fmt(val)}</div></div>
+      <div style="text-align:right"><span class="tag tac">${pct.toFixed(1)}%</span></div></div>
+      <div class="rbar-bg"><div class="rbar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="rcats">${topC.map(([c,v])=>`<span class="rcpill">${CE[c]||""} ${c}: ${fmtK(v)}</span>`).join("")}</div>`;
+    cards.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// NOVO LANÇAMENTO
+// ══════════════════════════════════════════════════
+function populateNovo() {
+  const setOpts = (id, arr) => {
+    const e = el(id); e.innerHTML = "";
+    arr.forEach(v => { const o=document.createElement("option"); o.value=v; o.text=v; e.appendChild(o); });
+  };
+  setOpts("n-cat", S.cfg.cats);
+  setOpts("n-resp", S.cfg.resps);
+  setOpts("n-pgto", S.cfg.pgtos);
+  setOpts("n-cartao", S.cfg.cartoes);
+  const re = el("n-resp");
+  for (let i=0; i<re.options.length; i++) { if (re.options[i].value==="Diogo") { re.selectedIndex=i; break; } }
+  el("n-data").value = new Date().toISOString().split("T")[0];
+  const mi = el("n-mesini"); mi.innerHTML = "";
+  const atual = mesAtual();
+  MESES_SEQ.slice(0,30).forEach(k => {
+    const o = document.createElement("option"); o.value=k; o.text=mesLabel(k);
+    if (k===atual) o.selected=true;
+    mi.appendChild(o);
+  });
+  updParc();
+}
+
+function syncCartao() {
+  const pgto = el("n-pgto").value;
+  const ce = el("n-cartao");
+  for (let i=0; i<ce.options.length; i++) { if (ce.options[i].value===pgto) { ce.selectedIndex=i; return; } }
+}
+
+function updParc() {
+  const nparc = parseInt(el("n-nparc").value)||1;
+  const val = parseFloat(el("n-valor").value)||0;
+  const mesIni = el("n-mesini").value;
+  const ppEl = el("pp");
+  if (nparc<=1 || !val) { ppEl.style.display="none"; return; }
+  ppEl.style.display = "block";
+  const valP = r2(val/nparc);
+  const iniIdx = mesIdx(mesIni);
+  let pills = "";
+  for (let i=0; i<nparc; i++) {
+    const idx = iniIdx+i;
+    const m = idx<MESES_SEQ.length ? MESES_SEQ[idx] : "?";
+    const cls = i===0 ? "pp-pill first" : "pp-pill";
+    pills += `<div class="${cls}">${mesLabel(m)}<br><small>${i+1}/${nparc}</small></div>`;
+  }
+  el("pp-list").innerHTML = pills;
+  const nStr = nparc+(nparc>1?" parcelas":" parcela")+" \u00b7 "+fmt(valP)+"/m\u00eas \u00b7 Total: "+fmt(val);
+  setText("pp-info", nStr);
+}
+
+function salvar() {
+  const desc = el("n-desc").value.trim();
+  const val = parseFloat(el("n-valor").value);
+  const data = el("n-data").value;
+  const cat = el("n-cat").value;
+  const resp = el("n-resp").value;
+  const pgto = el("n-pgto").value;
+  const cartao = el("n-cartao").value;
+  const nparc = parseInt(el("n-nparc").value)||1;
+  const mesIni = el("n-mesini").value;
+  if (!desc || !val || !data) { toast("⚠️ Preencha descrição, valor e data"); return; }
+  const valP = r2(val/nparc);
+  const iniIdx = mesIdx(mesIni);
+  const grupoId = nparc>1 ? uid() : null;
+  let criados = 0;
+  for (let i=0; i<nparc; i++) {
+    const idx = iniIdx+i;
+    if (idx>=MESES_SEQ.length) break;
+    const mes = MESES_SEQ[idx];
+    S.lancamentos.push({
+      id:uid(), mes, data, desc, cat, val:valP, resp, pgto, cartao,
+      parcela:`${i+1}/${nparc}`, proj: mesIdx(mes) > mesIdx(mesAtual()), grupoId
+    });
+    criados++;
+  }
+  saveSt(); populateLancFiltros(); populateNovo();
+  el("n-desc").value = ""; el("n-valor").value = ""; el("n-nparc").value = 1; el("pp").style.display="none";
+  rNovoRecentes();
+  if (typeof renderDash === "function") renderDash(selDash);
+  toast("✓ "+(criados>1 ? criados+" parcelas criadas!" : "Lançamento registrado!"));
+}
+
+function rNovoRecentes() {
+  const cont = el("n-rec"); cont.innerHTML="";
+  const rec = S.lancamentos.slice().sort((a,b)=>0).slice(0,8);
+  // pega os 8 mais recentemente adicionados (fim do array, exceto base inicial)
+  const recentes = S.lancamentos.slice(-8).reverse();
+  if (!recentes.length) { cont.innerHTML='<div class="empty">Nenhum registro ainda</div>'; return; }
+  recentes.forEach(r => {
+    const cl = r.cartao && r.cartao!==r.pgto ? r.cartao : (r.pgto||"—");
+    const d = document.createElement("div");
+    d.className = "li"+(r.proj?" pj":"");
+    d.innerHTML = `<div class="li-ico">${CE[r.cat]||"📦"}</div>
+      <div class="li-body"><div class="li-desc">${escHtml(r.desc)}</div>
+      <div class="li-meta">${escHtml(r.cat)} · ${escHtml(r.resp)} · ${escHtml(cl)} · ${mesLabel(r.mes)}</div></div>
+      <div class="li-r"><div class="li-val">${fmt(r.val)}</div>
+      <div class="li-sub">${r.parcela}</div></div>`;
+    cont.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// CONFIGURAÇÕES
+// ══════════════════════════════════════════════════
+function rCfg() {
+  el("cfg-sal").value = S.salary;
+  setText("cfg-sal-lbl", "Salário atual: "+fmt(S.salary)+"/mês");
+  ["cats","resps","cartoes","pgtos","bancos","tiposInv"].forEach(rCfgList);
+}
+
+function rCfgList(k) {
+  const cont = el("cl-"+k);
+  if (!cont) return;
+  cont.innerHTML="";
+  if (!S.cfg[k] || !S.cfg[k].length) { cont.innerHTML='<div class="empty" style="padding:8px;font-size:11px">Nenhum item</div>'; return; }
+  S.cfg[k].forEach((item,i) => {
+    const d=document.createElement("div"); d.className="cfg-item";
+    d.innerHTML = `<span style="font-size:12px;font-weight:500">${CE[item]||""} ${escHtml(item)}</span>
+      <button class="btn-rm" onclick="rmCfg('${k}',${i})">Remover</button>`;
+    cont.appendChild(d);
+  });
+}
+
+function addCfg(k) {
+  const inp = el("ni-"+k);
+  const val = inp.value.trim();
+  if (!val) return;
+  if (S.cfg[k].includes(val)) { toast("Já existe!"); return; }
+  S.cfg[k].push(val); S.cfg[k].sort();
+  saveSt(); inp.value=""; rCfgList(k); populateNovo(); populateLancFiltros();
+  if (k === "bancos" || k === "tiposInv") populateInvForm();
+  toast("✓ Adicionado: "+val);
+}
+
+function rmCfg(k, i) {
+  const name = S.cfg[k][i];
+  if (!confirm('Remover "'+name+'"?')) return;
+  S.cfg[k].splice(i,1); saveSt(); rCfgList(k); populateNovo(); populateLancFiltros();
+  if (k === "bancos" || k === "tiposInv") populateInvForm();
+  toast("Removido");
+}
+
+function saveSal() {
+  const val = parseFloat(el("cfg-sal").value);
+  if (!val || val<=0) { toast("Valor inválido"); return; }
+  S.salary=val; saveSt();
+  setText("cfg-sal-lbl","Salário atual: "+fmt(S.salary)+"/mês");
+  if (typeof renderDash === "function") renderDash(selDash);
+  toast("✓ Salário atualizado!");
+}
+
+// ══════════════════════════════════════════════════
+// NAVEGAÇÃO PRINCIPAL
+// ══════════════════════════════════════════════════
+function navTo(id) {
+  document.querySelectorAll(".pg").forEach(p => p.classList.remove("on"));
+  document.querySelectorAll(".bn").forEach(b => b.classList.remove("on"));
+  el("pg-"+id).classList.add("on");
+  const btn = el("bn-"+id);
+  if (btn) btn.classList.add("on");
+  if (id === "dash") renderDash(selDash);
+  else if (id === "lanc") rLanc();
+  else if (id === "resp") rResp();
+  else if (id === "reimb") renderReimb(selReimb);
+  else if (id === "inv") { renderInvList(); renderInvResumo(); }
+  else if (id === "novo") { populateNovo(); rNovoRecentes(); }
+  else if (id === "cfg") rCfg();
+}
+
+function init() {
+  selDash = setInitialMonth();
+  selResp = selDash;
+  selReimb = selDash;
+  populateLancFiltros();
+  populateNovo();
+  populateInvForm();
+  renderDash(selDash);
+}
+init();
+
+</script>
+</body>
+</html>
