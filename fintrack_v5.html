@@ -733,9 +733,13 @@ input,select,button{font-family:var(--ff)}
         <div class="fg"><label class="fl">Cartão</label><select class="fc" id="n-cartao"></select></div>
       </div>
       <div class="fg2">
-        <div class="fg"><label class="fl">Nº Parcelas</label>
+        <div class="fg"><label class="fl" id="n-nparc-lbl">Nº Parcelas</label>
           <input class="fc" id="n-nparc" type="number" value="1" min="1" max="60" inputmode="numeric" oninput="updParc()"></div>
         <div class="fg"><label class="fl">Mês da 1ª Parcela</label><select class="fc" id="n-mesini" onchange="updParc()"></select></div>
+      </div>
+      <div class="fg" style="display:flex;align-items:center;gap:8px;margin-top:-4px">
+        <input type="checkbox" id="n-fixo" onchange="updParc()" style="width:16px;height:16px">
+        <label for="n-fixo" style="font-size:12px;color:var(--su)">Mesmo valor em todos os meses (assinatura, aluguel, etc — não divide o valor)</label>
       </div>
       <div class="pp" id="pp">
         <div class="pp-ttl">📅 Parcelas que serão criadas:</div>
@@ -2455,16 +2459,39 @@ function lMore() { lPg++; rLancPg(); }
 function delLanc(e, id, grupoId) {
   e.stopPropagation();
   const grupo = grupoId ? S.lancamentos.filter(r=>r.grupoId===grupoId) : [];
+  let idsRemovidos = [];
   if (grupo.length > 1) {
     const all = confirm(`Parcelado com ${grupo.length} parcelas. Remover TODAS?`);
-    if (all) S.lancamentos = S.lancamentos.filter(r=>r.grupoId!==grupoId);
-    else if (confirm("Remover só esta parcela?")) S.lancamentos = S.lancamentos.filter(r=>r.id!==id);
+    if (all) { idsRemovidos = grupo.map(r=>r.id); S.lancamentos = S.lancamentos.filter(r=>r.grupoId!==grupoId); }
+    else if (confirm("Remover só esta parcela?")) { idsRemovidos = [id]; S.lancamentos = S.lancamentos.filter(r=>r.id!==id); }
     else return;
   } else {
     if (!confirm("Remover este lançamento?")) return;
+    idsRemovidos = [id];
     S.lancamentos = S.lancamentos.filter(r=>r.id!==id);
   }
-  saveSt(); populateLancFiltros(); rLanc(); toast("Removido");
+  reverterStatusPagoSeVinculado(idsRemovidos);
+  saveSt(); populateLancFiltros(); rLanc(); refreshCurrentScreen(); toast("Removido");
+}
+
+// Se o lançamento removido tiver vindo de um "Pagar" em Recorrentes/Avulsas
+// (linkado via lancId), reverte o status pra "pendente" de novo — senão a tela
+// "A Pagar" ficaria mostrando "✓ pago" pra um pagamento que não existe mais.
+function reverterStatusPagoSeVinculado(idsRemovidos) {
+  const set = new Set(idsRemovidos);
+  let mudou = false;
+  if (S.recorrentesPagos) {
+    const antes = S.recorrentesPagos.length;
+    S.recorrentesPagos = S.recorrentesPagos.filter(p => !set.has(p.lancId));
+    if (S.recorrentesPagos.length !== antes) mudou = true;
+  }
+  (S.contasAvulsas||[]).forEach(c => {
+    if (c.lancId && set.has(c.lancId)) {
+      c.pago = false; c.dataPagto = null; c.valPago = null; c.lancId = null;
+      mudou = true;
+    }
+  });
+  if (mudou) toast("Status revertido pra pendente em Contas a Pagar");
 }
 
 // ── EDITAR LANÇAMENTO (uma parcela/mês específico) ──
@@ -2519,12 +2546,22 @@ function salvarEdicaoLanc() {
   r.resp = el('el-resp').value;
   r.pgto = el('el-pgto').value;
   r.cartao = el('el-cartao').value;
+  sincronizarValorPagoVinculado(r.id, r.val);
   saveSt();
   fecharEditLanc();
   populateLancFiltros();
   rLanc();
   refreshCurrentScreen();
   toast('✓ Lançamento atualizado');
+}
+
+// Se este lançamento veio de um "Pagar" em Recorrentes/Avulsas, mantém o valor
+// mostrado naquelas telas em dia com o que foi editado aqui.
+function sincronizarValorPagoVinculado(lancId, novoVal) {
+  const pagoRec = (S.recorrentesPagos||[]).find(p => p.lancId === lancId);
+  if (pagoRec) pagoRec.val = novoVal;
+  const avulsa = (S.contasAvulsas||[]).find(c => c.lancId === lancId);
+  if (avulsa) avulsa.valPago = novoVal;
 }
 
 // ══════════════════════════════════════════════════
@@ -2630,20 +2667,23 @@ function updParc() {
   const nparc = parseInt(el("n-nparc").value)||1;
   const val = parseFloat(el("n-valor").value)||0;
   const mesIni = el("n-mesini").value;
+  const fixo = el("n-fixo").checked;
   const ppEl = el("pp");
+  setText("n-nparc-lbl", fixo ? "Repetir por quantos meses" : "Nº Parcelas");
   if (nparc<=1 || !val) { ppEl.style.display="none"; return; }
   ppEl.style.display = "block";
-  const valP = r2(val/nparc);
+  const valP = fixo ? r2(val) : r2(val/nparc);
+  const totalGeral = fixo ? r2(val*nparc) : val;
   const iniIdx = mesIdx(mesIni);
   let pills = "";
   for (let i=0; i<nparc; i++) {
     const idx = iniIdx+i;
     const m = idx<MESES_SEQ.length ? MESES_SEQ[idx] : "?";
     const cls = i===0 ? "pp-pill first" : "pp-pill";
-    pills += `<div class="${cls}">${mesLabel(m)}<br><small>${i+1}/${nparc}</small></div>`;
+    pills += `<div class="${cls}">${mesLabel(m)}<br><small>${fixo ? fmt(valP) : (i+1)+"/"+nparc}</small></div>`;
   }
   el("pp-list").innerHTML = pills;
-  const nStr = nparc+(nparc>1?" parcelas":" parcela")+" \u00b7 "+fmt(valP)+"/m\u00eas \u00b7 Total: "+fmt(val);
+  const nStr = nparc+(nparc>1?" meses":" mês")+" \u00b7 "+fmt(valP)+"/m\u00eas \u00b7 Total: "+fmt(totalGeral);
   setText("pp-info", nStr);
 }
 
@@ -2657,8 +2697,9 @@ function salvar() {
   const cartao = el("n-cartao").value;
   const nparc = parseInt(el("n-nparc").value)||1;
   const mesIni = el("n-mesini").value;
+  const fixo = el("n-fixo").checked;
   if (!desc || !val || !data) { toast("⚠️ Preencha descrição, valor e data"); return; }
-  const valP = r2(val/nparc);
+  const valP = fixo ? r2(val) : r2(val/nparc);
   const iniIdx = mesIdx(mesIni);
   const grupoId = nparc>1 ? uid() : null;
   let criados = 0;
@@ -2674,10 +2715,10 @@ function salvar() {
     criados++;
   }
   saveSt(); populateLancFiltros(); populateNovo();
-  el("n-desc").value = ""; el("n-valor").value = ""; el("n-nparc").value = 1; el("pp").style.display="none";
+  el("n-desc").value = ""; el("n-valor").value = ""; el("n-nparc").value = 1; el("n-fixo").checked = false; el("pp").style.display="none";
   rNovoRecentes();
   if (typeof renderDash === "function") renderDash(selDash);
-  toast("✓ "+(criados>1 ? criados+" parcelas criadas!" : "Lançamento registrado!"));
+  toast("✓ "+(criados>1 ? criados+(fixo ? " meses criados!" : " parcelas criadas!") : "Lançamento registrado!"));
 }
 
 function rNovoRecentes() {
@@ -2879,9 +2920,20 @@ function pagarRecorrente(recId, mes) {
   if (input === null) return;
   const v = parseFloat(input.replace(',','.'));
   if (!v || v <= 0) return;
-  S.recorrentesPagos.push({ recId, mes, val: v, data: new Date().toLocaleDateString('pt-BR') });
+  const lancId = uid();
+  S.recorrentesPagos.push({ recId, mes, val: v, data: new Date().toLocaleDateString('pt-BR'), lancId });
+  // Cria também um lançamento de verdade — sem isso, o pagamento não aparecia no
+  // Dashboard, nos Reembolsos nem no relatório por pessoa (eram mundos separados).
+  // Guarda o lancId aqui em cima pra poder reverter o status "pago" se esse
+  // lançamento for editado/excluído depois (ver delLanc).
+  S.lancamentos.push({
+    id: lancId, mes, data: new Date().toISOString().split('T')[0],
+    desc: rec.desc, cat: rec.cat, val: r2(v), resp: rec.pessoa,
+    pgto: 'Recorrente', cartao: null, parcela: '1/1', proj: false, grupoId: null
+  });
   saveSt();
   renderContas();
+  refreshCurrentScreen();
   toast(`✓ R$ ${fmt(v)} pago para ${rec.pessoa}!`);
 }
 
@@ -2951,11 +3003,21 @@ function pagarAvulsa(id) {
   if (input === null) return;
   const v = parseFloat(input.replace(',','.'));
   if (!v || v <= 0) return;
+  const lancId = uid();
   c.pago = true;
   c.dataPagto = new Date().toLocaleDateString('pt-BR');
   c.valPago = v;
+  c.lancId = lancId;
+  // Mesma integração do recorrente: gera um lançamento real pra contar em tudo,
+  // e guarda o lancId pra poder reverter o status "pago" se ele for apagado depois.
+  S.lancamentos.push({
+    id: lancId, mes: c.mes, data: c.data || new Date().toISOString().split('T')[0],
+    desc: c.desc, cat: c.cat, val: r2(v), resp: c.pessoa,
+    pgto: 'Avulsa', cartao: null, parcela: '1/1', proj: false, grupoId: null
+  });
   saveSt();
   renderContas();
+  refreshCurrentScreen();
   toast(`✓ ${fmt(v)} pago para ${c.pessoa}!`);
 }
 
@@ -2965,16 +3027,24 @@ function delAvulsa(id) {
     const grupo = (S.contasAvulsas||[]).filter(x => x.grupoId === c.grupoId);
     if (grupo.length > 1) {
       const all = confirm(`Parcelado com ${grupo.length} parcelas. Remover TODAS?`);
-      if (all) S.contasAvulsas = (S.contasAvulsas||[]).filter(x => x.grupoId !== c.grupoId);
-      else if (confirm('Remover só esta parcela?')) S.contasAvulsas = (S.contasAvulsas||[]).filter(x => x.id !== id);
-      else return;
-      saveSt(); renderContas(); toast('Removido');
+      if (all) {
+        const lancIds = grupo.filter(x => x.lancId).map(x => x.lancId);
+        S.contasAvulsas = (S.contasAvulsas||[]).filter(x => x.grupoId !== c.grupoId);
+        S.lancamentos = S.lancamentos.filter(l => !lancIds.includes(l.id));
+      } else if (confirm('Remover só esta parcela?')) {
+        if (c.lancId) S.lancamentos = S.lancamentos.filter(l => l.id !== c.lancId);
+        S.contasAvulsas = (S.contasAvulsas||[]).filter(x => x.id !== id);
+      } else return;
+      saveSt(); renderContas(); refreshCurrentScreen(); toast('Removido');
       return;
     }
   }
   if (!confirm('Remover esta conta?')) return;
+  // Se essa conta já tinha sido paga (virou lançamento), remove o lançamento junto —
+  // senão ele ficava órfão, contando pra sempre no Dashboard e nos Reembolsos.
+  if (c && c.lancId) S.lancamentos = S.lancamentos.filter(l => l.id !== c.lancId);
   S.contasAvulsas = (S.contasAvulsas||[]).filter(c => c.id !== id);
-  saveSt(); renderContas(); toast('Removido');
+  saveSt(); renderContas(); refreshCurrentScreen(); toast('Removido');
 }
 
 // ── HISTÓRICO ────────────────────────────────────
@@ -3014,7 +3084,7 @@ function initContasForm() {
   const fillPessoa = (id) => {
     const e = el(id); if(!e) return;
     e.innerHTML = '';
-    (S.cfg.resps||[]).filter(r => r !== 'Diogo').forEach(p => {
+    (S.cfg.resps||[]).forEach(p => {
       const o = document.createElement('option'); o.value=p; o.text=p; e.appendChild(o);
     });
     // Padrão: Camila
@@ -3031,7 +3101,8 @@ function initContasForm() {
   // Mes selector para avulsa
   const avMes = el('av-mes'); if(!avMes) return;
   avMes.innerHTML = '';
-  getMesesAtivos().forEach(k => {
+  const idxAtualAv = Math.max(mesIdx(mesAtual()), 0);
+  getMesesAtivos().filter(k => mesIdx(k) >= idxAtualAv).forEach(k => {
     const o=document.createElement('option');o.value=k;o.text=mesLabel(k);
     if(k===selContas) o.selected=true;
     avMes.appendChild(o);
