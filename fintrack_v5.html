@@ -411,7 +411,7 @@ input,select,button{font-family:var(--ff)}
       <span id="sync-dot" style="width:6px;height:6px;border-radius:50%;background:var(--gn);display:inline-block;"></span>
       <span id="sync-text">salvo</span>
     </div>
-    <div class="hdr-mes" id="hdr-info">—</div>
+    <select class="hdr-mes" id="hdr-info" onchange="pularParaMes(this.value)" style="border:none;-webkit-appearance:none;appearance:none;cursor:pointer"></select>
   </div>
 </header>
 
@@ -720,7 +720,7 @@ input,select,button{font-family:var(--ff)}
       <div class="fg"><label class="fl">Descrição *</label>
         <input class="fc" id="n-desc" placeholder="Ex: Supermercado, Netflix, Academia…" autocomplete="off"></div>
       <div class="fg2">
-        <div class="fg"><label class="fl">Data *</label><input class="fc" id="n-data" type="date"></div>
+        <div class="fg"><label class="fl">Data *</label><input class="fc" id="n-data" type="date" onchange="atualizarMesIniPadrao()"></div>
         <div class="fg"><label class="fl">Valor Total (R$) *</label>
           <input class="fc" id="n-valor" type="number" step="0.01" min="0" placeholder="0,00" inputmode="decimal" oninput="updParc()"></div>
       </div>
@@ -1004,6 +1004,27 @@ input,select,button{font-family:var(--ff)}
   </div>
 </div>
 
+<div class="mbg" id="m-edit-inv" onclick="if(event.target===this)fecharEditInv()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div class="m-ttl" style="margin-bottom:0">Editar Investimento</div><button onclick="fecharEditInv()" style="background:var(--s2);border:1px solid var(--b1);color:var(--tx);width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;flex-shrink:0">✕</button></div>
+    <div class="fg"><label class="fl">Descrição</label><input class="fc" id="ei-desc"></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Banco</label><select class="fc" id="ei-banco"></select></div>
+      <div class="fg"><label class="fl">Tipo</label><select class="fc" id="ei-tipo"></select></div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Valor Aplicado (R$)</label><input class="fc" id="ei-valor" type="number" step="0.01" inputmode="decimal"></div>
+      <div class="fg"><label class="fl">Data da Aplicação</label><input class="fc" id="ei-data" type="date"></div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Taxa</label><input class="fc" id="ei-taxa" placeholder="Ex: 110% CDI"></div>
+      <div class="fg"><label class="fl">Vencimento</label><input class="fc" id="ei-vencimento" type="date"></div>
+    </div>
+    <button class="btnp" onclick="salvarEdicaoInv()">Salvar alterações</button>
+  </div>
+</div>
+
 <div id="toast" style="position:fixed;bottom:74px;left:50%;
   transform:translateX(-50%) translateY(12px);
   background:var(--s3);border:1px solid var(--b2);color:var(--tx);
@@ -1027,6 +1048,13 @@ for (let y = 2026; y <= 2030; y++) {
 const HIST = new Set(["Jul/26"]);
 
 function mesIdx(k) { return MESES_SEQ.indexOf(k); }
+// Um lançamento é "projeção" quando o mês dele ainda não chegou — calculado na
+// hora, sempre comparando com o mês atual real. Antes isso era gravado uma vez
+// só na criação do lançamento e nunca mais atualizava: um lançamento de
+// setembro criado em agosto ficava marcado "projeção" pra sempre, mesmo depois
+// que setembro virasse o mês corrente de verdade. Use esta função em vez de
+// ler r.proj diretamente.
+function ehProjecao(r) { return mesIdx(r.mes) > mesIdx(mesAtual()); }
 function mesLabel(k) {
   const [m, y] = k.split("/");
   return y === "26" ? m : m + " '" + y;
@@ -1210,11 +1238,11 @@ function buildMonthStrip(contId, curSel, ativos, maxFuturos, onPick, hideable) {
     btn.className = "mp" + (isFut ? " fut" : "") + (k === curSel ? " on" : "");
     btn.style.position = "relative";
     btn.textContent = mesLabel(k);
-    if (hideable) {
+    if (hideable && k === curSel) {
       const xBtn = document.createElement("span");
       xBtn.textContent = "×";
       xBtn.title = "Ocultar " + mesLabel(k) + " desta faixa";
-      xBtn.style.cssText = "position:absolute;top:-6px;right:-4px;background:var(--rd);color:#fff;border-radius:50%;width:16px;height:16px;font-size:11px;line-height:16px;text-align:center;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.3)";
+      xBtn.style.cssText = "position:absolute;top:-5px;right:-5px;background:var(--s1);color:var(--mu);border:1px solid var(--b1);border-radius:50%;width:15px;height:15px;font-size:10px;line-height:14px;text-align:center;font-weight:700";
       xBtn.onclick = (e) => { e.stopPropagation(); ocultarMesStrip(k); };
       btn.appendChild(xBtn);
     }
@@ -1419,6 +1447,26 @@ function initDashStrip() {
   buildMonthStrip("ms-dash", selDash, getMesesAtivos(), 3, k => { selDash = k; renderDash(k); }, true);
 }
 
+// Seletor rápido de mês no header — complementa a faixa (boa pra trocar entre
+// meses vizinhos) permitindo pular direto pra qualquer mês, inclusive distante,
+// sem precisar rolar a faixa inteira.
+function popularSeletorMesRapido(atual) {
+  const sel = el('hdr-info');
+  if (!sel) return;
+  sel.innerHTML = '';
+  MESES_SEQ.forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.text = mesLabel(k);
+    if (k === atual) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+function pularParaMes(mes) {
+  selDash = mes;
+  renderDash(mes);
+  initDashStrip();
+}
+
 function tempoRelativo(iso) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -1493,14 +1541,14 @@ function renderUltimaAtividade() {
 function renderPorCartao() {
   const cont = el('pa-cartoes');
   if (!cont) return;
-  // Usa o campo "data" — esse existe em TODO lançamento, novo ou antigo.
-  // Por cartão: qual foi a data do último lançamento e há quantos dias — pra você
-  // saber, na hora de bater com a fatura, quais cartões estão em dia e quais estão atrasados.
+  // Mostra TODO lançamento já registrado nesse cartão, seja qual for o mês —
+  // pra saber quando você mexeu nele por último, mesmo que tenha lançado
+  // parcelas de meses futuros.
   const cartoes = new Set(S.cfg.cartoes || []);
   S.lancamentos.forEach(r => cartoes.add(r.cartao || r.pgto));
   const hojeMs = Date.now();
   const linhas = [...cartoes].filter(Boolean).map(cartao => {
-    const dos = S.lancamentos.filter(r => (r.cartao || r.pgto) === cartao && !r.proj && r.data);
+    const dos = S.lancamentos.filter(r => (r.cartao || r.pgto) === cartao && r.data);
     if (!dos.length) return { cartao, ultimaData: null, dias: null, qtd: 0 };
     const ultimaData = dos.reduce((a,r) => r.data > a ? r.data : a, dos[0].data);
     const dias = Math.floor((hojeMs - new Date(ultimaData).getTime()) / 86400000);
@@ -1527,7 +1575,7 @@ function renderPorCartao() {
 function renderDash(mes) {
   selDash = mes;
   initDashStrip();
-  setText("hdr-info", mesLabel(mes));
+  popularSeletorMesRapido(mes);
   setText("d-mesnome", mesLabel(mes));
   renderUltimaAtividade();
 
@@ -1541,12 +1589,12 @@ function renderDash(mes) {
   const rd = renda(mes);
   const saldo = rd - meuGastoTotal;
   const pct = rd > 0 ? Math.min(meuGastoTotal/rd*100, 100) : 0;
-  const isProj = dados.length > 0 && dados.every(r => r.proj);
+  const isProjMes = dados.length > 0 && dados.every(r => ehProjecao(r));
   const isEmpty = dados.length === 0;
 
   // Cabeçalho do saldo
   setText("d-renda", fmt(rd));
-  setText("d-glbl", isProj ? "Meus Gastos (previstos)" : "Meus Gastos");
+  setText("d-glbl", isProjMes ? "Meus Gastos (previstos)" : "Meus Gastos");
   setText("d-gastos", fmt(meuGastoTotal));
   const difCompartilhado = gastosTotal - meuGasto;
   const difCompartilhado2 = gastosTotal - meuGasto;
@@ -1559,11 +1607,11 @@ function renderDash(mes) {
   saldoEl.style.cssText = "font-size:30px;margin-top:4px";
 
   setText("sb-pct", pct.toFixed(1) + "% comprometido");
-  setText("sb-lbl", isProj ? "⚠️ Projeção (parcelados)" : isEmpty ? "Sem lançamentos ainda" : "Comprometido");
+  setText("sb-lbl", isProjMes ? "⚠️ Projeção (parcelados)" : isEmpty ? "Sem lançamentos ainda" : "Comprometido");
   const bar = el("sbfill");
   bar.style.width = Math.max(pct,2) + "%";
   bar.style.background = pct > 90 ? "var(--rd)" : pct > 70 ? "var(--am)" : "var(--gn)";
-  el("saldo-card").style.borderStyle = isProj ? "dashed" : "";
+  el("saldo-card").style.borderStyle = isProjMes ? "dashed" : "";
 
   renderRendaExtra(mes);
 
@@ -1677,7 +1725,7 @@ function renderChartDiario(mes, dados) {
 function renderChartHistorico(mesSel) {
   const ativos = getMesesAtivos();
   const gastosMes = ativos.map(k => sumMinha(byM(k)));
-  const isP = ativos.map(k => byM(k).every(r => r.proj));
+  const isP = ativos.map(k => byM(k).every(r => ehProjecao(r)));
 
   if (chInst.hist) chInst.hist.destroy();
   chInst.hist = new Chart(el("ch-historico"), {
@@ -2240,6 +2288,8 @@ function renderInvList() {
         <button class="btn-sm-inv" onclick="openRendModal('${inv.id}')">+ Rendimento</button>
         <button class="btn-sm-inv" onclick="toggleInvHist('${inv.id}')">📊 Histórico</button>
         <button class="btn-sm-inv resgate" onclick="openResgateModal('${inv.id}')">💸 Resgatar</button>
+        <button class="btn-sm-inv" onclick="abrirEditInv('${inv.id}')">✏️</button>
+        <button class="btn-sm-inv" onclick="delInvestimento('${inv.id}')" style="color:var(--rd)">🗑️</button>
       </div>
       <div class="inv-hist" id="inv-hist-${inv.id}" style="display:none"></div>
     `;
@@ -2325,6 +2375,66 @@ function confirmarResgate() {
   toast("✓ Resgate de " + fmt(valor) + " confirmado!");
 }
 
+// ── EDITAR / EXCLUIR INVESTIMENTO ──
+let _editInvId = null;
+function abrirEditInv(id) {
+  const inv = S.investimentos.find(i => i.id === id);
+  if (!inv) return;
+  _editInvId = id;
+  el('ei-desc').value = inv.desc;
+  el('ei-valor').value = inv.valorAplicado;
+  el('ei-data').value = inv.dataAplicacao;
+  el('ei-taxa').value = inv.taxa || '';
+  el('ei-vencimento').value = inv.vencimento || '';
+  const fillSel = (selId, arr, current) => {
+    const s = el(selId); s.innerHTML = '';
+    const opts = arr.includes(current) ? arr : [...arr, current];
+    opts.forEach(v => { const o = document.createElement('option'); o.value = v; o.text = v; s.appendChild(o); });
+    s.value = current;
+  };
+  fillSel('ei-banco', S.cfg.bancos, inv.banco);
+  fillSel('ei-tipo', S.cfg.tiposInv, inv.tipo);
+  el('m-edit-inv').classList.add('on');
+}
+function fecharEditInv() {
+  el('m-edit-inv').classList.remove('on');
+  _editInvId = null;
+}
+function salvarEdicaoInv() {
+  const inv = S.investimentos.find(i => i.id === _editInvId);
+  if (!inv) return;
+  const desc = el('ei-desc').value.trim();
+  const valor = parseFloat(el('ei-valor').value);
+  const data = el('ei-data').value;
+  if (!desc || !valor || !data) { toast('⚠️ Preencha descrição, valor e data'); return; }
+  inv.desc = desc;
+  inv.valorAplicado = r2(valor);
+  inv.dataAplicacao = data;
+  inv.banco = el('ei-banco').value;
+  inv.tipo = el('ei-tipo').value;
+  inv.taxa = el('ei-taxa').value.trim();
+  inv.vencimento = el('ei-vencimento').value || null;
+  saveSt();
+  fecharEditInv();
+  renderInvList();
+  renderInvResumo();
+  toast('✓ Investimento atualizado');
+}
+function delInvestimento(id) {
+  const inv = S.investimentos.find(i => i.id === id);
+  if (!inv) return;
+  const temHistorico = (inv.rendimentos && inv.rendimentos.length > 0) || !inv.ativo;
+  const msg = temHistorico
+    ? `"${inv.desc}" tem rendimentos lançados ou já foi resgatado. Excluir apaga TODO o histórico dele. Confirmar?`
+    : `Excluir "${inv.desc}"?`;
+  if (!confirm(msg)) return;
+  S.investimentos = S.investimentos.filter(i => i.id !== id);
+  saveSt();
+  renderInvList();
+  renderInvResumo();
+  toast('Removido');
+}
+
 function renderInvResgatados() {
   const cont = el("inv-resgatados");
   const resgatados = S.investimentos.filter(i => !i.ativo);
@@ -2335,13 +2445,30 @@ function renderInvResgatados() {
   cont.innerHTML = resgatados.map(inv => {
     const lucro = (inv.valorResgate||0) - inv.valorAplicado;
     const pct = inv.valorAplicado > 0 ? (lucro/inv.valorAplicado*100) : 0;
-    return `<div class="li" style="margin-bottom:4px">
+    return `<div class="li" style="margin-bottom:4px;flex-wrap:wrap">
       <div class="li-ico">💸</div>
       <div class="li-body"><div class="li-desc">${escHtml(inv.desc)}</div>
       <div class="li-meta">${escHtml(inv.banco)} · resgatado em ${inv.dataResgate ? inv.dataResgate.split('-').reverse().join('/') : ''}</div></div>
       <div class="li-r"><div class="li-val ${lucro>=0?'green':'red'}">${lucro>=0?'+':''}${fmt(lucro)}</div>
-      <div class="li-sub">${pct.toFixed(1)}%</div></div></div>`;
+      <div class="li-sub">${pct.toFixed(1)}%</div></div>
+      <div style="width:100%;display:flex;gap:8px;margin-top:6px">
+        <button onclick="desfazerResgate('${inv.id}')" style="flex:1;background:var(--s2);border:1px solid var(--b1);color:var(--tx);border-radius:8px;padding:6px;font-size:11px;font-family:var(--ff);cursor:pointer">↩️ Desfazer resgate</button>
+        <button onclick="delInvestimento('${inv.id}')" style="flex:1;background:var(--s2);border:1px solid var(--b1);color:var(--rd);border-radius:8px;padding:6px;font-size:11px;font-family:var(--ff);cursor:pointer">🗑️ Excluir</button>
+      </div></div>`;
   }).join("");
+}
+
+function desfazerResgate(id) {
+  const inv = S.investimentos.find(i => i.id === id);
+  if (!inv) return;
+  if (!confirm(`Desfazer o resgate de "${inv.desc}"? Ele volta pra lista de investimentos ativos.`)) return;
+  inv.ativo = true;
+  inv.dataResgate = null;
+  inv.valorResgate = null;
+  saveSt();
+  renderInvList();
+  renderInvResumo();
+  toast('✓ Resgate desfeito');
 }
 
 // ══════════════════════════════════════════════════
@@ -2375,11 +2502,11 @@ function rLanc() {
     if (cat && r.cat!==cat) return false;
     if (resp && r.resp!==resp) return false;
     if (cartao && (r.cartao||r.pgto)!==cartao) return false;
-    if (tipo==="real" && r.proj) return false;
-    if (tipo==="proj" && !r.proj) return false;
+    if (tipo==="real" && ehProjecao(r)) return false;
+    if (tipo==="proj" && !ehProjecao(r)) return false;
     if (q && !r.desc.toLowerCase().includes(q) && !r.cat.toLowerCase().includes(q)) return false;
     return true;
-  }).sort((a,b) => mesIdx(b.mes)-mesIdx(a.mes));
+  }).sort((a,b) => mesIdx(b.mes)-mesIdx(a.mes) || new Date(b.criadoEm||0)-new Date(a.criadoEm||0));
   lPg = 0;
   setText("l-cnt", lFil.length+" lançamentos");
   setText("l-tot", fmt(sumV(lFil)));
@@ -2433,18 +2560,18 @@ function rLancPg() {
       prevMes = r.mes;
       const sep = document.createElement("div");
       sep.className = "li-sep";
-      sep.textContent = mesLabel(r.mes) + (r.proj ? " — projeção" : " — real");
+      sep.textContent = mesLabel(r.mes) + (ehProjecao(r) ? " — projeção" : " — real");
       list.appendChild(sep);
     }
     const cl = r.cartao && r.cartao!==r.pgto ? r.cartao : (r.pgto||"—");
     const minhaParte = minhaParteVal(r);
     const isShared = r.resp.includes("/");
     const d = document.createElement("div");
-    d.className = "li" + (r.proj?" pj":"") + (modoConf && r.conferido ? " conferido":"");
+    d.className = "li" + (ehProjecao(r)?" pj":"") + (modoConf && r.conferido ? " conferido":"");
     if (!modoConf) d.style.cursor = "pointer";
     d.innerHTML = `${modoConf ? `<div class="li-check" onclick="toggleConferido('${r.id}')" style="font-size:20px;padding-right:6px;cursor:pointer">${r.conferido?'✅':'⬜'}</div>` : ''}<div class="li-ico">${CE[r.cat]||"📦"}</div>
       <div class="li-body"><div class="li-desc">${escHtml(r.desc)}</div>
-      <div class="li-meta">${escHtml(r.cat)} · ${escHtml(r.resp)} · ${escHtml(cl)}</div></div>
+      <div class="li-meta">${escHtml(r.cat)} · ${escHtml(r.resp)} · ${escHtml(cl)}${r.criadoEm ? ' · <span style="color:var(--mu)">registrado '+tempoRelativo(r.criadoEm)+'</span>' : ''}</div></div>
       <div class="li-r"><div class="li-val">${fmt(r.val)}</div>
       <div class="li-sub">${isShared ? "sua: "+fmt(minhaParte) : (r.parcela && r.parcela!=="1/1" ? r.parcela : mesLabel(r.mes))}</div></div>
       ${modoConf ? '' : `<button class="li-del" onclick="delLanc(event,'${r.id}','${r.grupoId||''}')">&times;</button>`}`;
@@ -2589,10 +2716,14 @@ function rResp() {
   if (rcat) dados=dados.filter(r=>r.cat===rcat);
   if (rcartao) dados=dados.filter(r=>(r.cartao||r.pgto)===rcartao);
 
-  const porResp = {};
-  dados.forEach(r => porResp[r.resp]=(porResp[r.resp]||0)+r.val);
-  const sorted = Object.entries(porResp).sort((a,b)=>b[1]-a[1]);
-  const total = sumV(dados);
+  // Agrupa pelo gasto REAL de cada pessoa: soma o que é só dela + a fração do
+  // que ela divide com outros (não mais pelo texto exato de "resp", que tratava
+  // "Diogo", "Diogo/Camila" e "Diogo/Diego" como três categorias diferentes).
+  const pessoas = pessoasDistintas(dados);
+  const porPessoa = {};
+  pessoas.forEach(p => porPessoa[p] = sumPessoa(p, dados));
+  const sorted = Object.entries(porPessoa).sort((a,b)=>b[1]-a[1]);
+  const total = sorted.reduce((a,[,v])=>a+v, 0);
 
   if (chInst.rpizza) chInst.rpizza.destroy();
   const canvasPizza = el("ch-rpizza");
@@ -2613,20 +2744,26 @@ function rResp() {
 
   const cards = el("r-cards"); cards.innerHTML="";
   if (!sorted.length) { cards.innerHTML = '<div class="empty">Nenhum gasto neste mês com esses filtros</div>'; return; }
-  sorted.forEach(([resp,val],i) => {
+  sorted.forEach(([pessoa,val],i) => {
     const pct = total>0 ? val/total*100 : 0;
     const catR = {};
-    dados.filter(r=>r.resp===resp).forEach(r=>catR[r.cat]=(catR[r.cat]||0)+r.val);
+    dados.filter(r => fracaoPessoa(pessoa, r.resp) > 0)
+      .forEach(r => catR[r.cat] = (catR[r.cat]||0) + partePessoa(pessoa, r));
     const topC = Object.entries(catR).sort((a,b)=>b[1]-a[1]).slice(0,4);
-    const ini = resp.replace("/","").slice(0,2) || resp[0];
+    const ini = pessoa.slice(0,2);
     const col = RCOL[i%RCOL.length];
     const d = document.createElement("div"); d.className = "rcard";
     d.innerHTML = `<div class="rcard-hd">
       <div class="rav" style="background:${col}22;color:${col}">${ini}</div>
-      <div><div class="rnm">${escHtml(resp)}</div><div class="rtot" style="color:${col}">${fmt(val)}</div></div>
+      <div><div class="rnm">${escHtml(pessoa)}</div><div class="rtot" style="color:${col}">${fmt(val)}</div></div>
       <div style="text-align:right"><span class="tag tac">${pct.toFixed(1)}%</span></div></div>
       <div class="rbar-bg"><div class="rbar-fill" style="width:${pct}%;background:${col}"></div></div>
-      <div class="rcats">${topC.map(([c,v])=>`<span class="rcpill">${CE[c]||""} ${c}: ${fmtK(v)}</span>`).join("")}</div>`;
+      <div class="rcats">${topC.map(([c,v])=>`<span class="rcpill">${CE[c]||""} ${c}: ${fmtK(v)}</span>`).join("")}</div>
+      <button class="btn-reimb" data-p="${escHtml(pessoa)}" data-m="${selResp}" onclick="abrirRelatorioPessoa(this)"
+        style="width:100%;margin-top:10px;padding:9px;border-radius:8px;border:1px solid var(--b1);
+        background:var(--s2);color:var(--tx);font-size:12px;font-weight:700;font-family:var(--ff);cursor:pointer">
+        📄 Detalhamento completo / Relatório
+      </button>`;
     cards.appendChild(d);
   });
 }
@@ -2646,14 +2783,31 @@ function populateNovo() {
   const re = el("n-resp");
   for (let i=0; i<re.options.length; i++) { if (re.options[i].value==="Diogo") { re.selectedIndex=i; break; } }
   el("n-data").value = new Date().toISOString().split("T")[0];
+  preencherOpcoesMesIni();
+  atualizarMesIniPadrao();
+  updParc();
+}
+
+// Preenche as opções do "Mês da 1ª Parcela" (mês atual em diante, sem meses passados).
+function preencherOpcoesMesIni() {
   const mi = el("n-mesini"); mi.innerHTML = "";
-  const atual = mesAtual();
-  const idxAtual = Math.max(mesIdx(atual), 0);
+  const idxAtual = Math.max(mesIdx(mesAtual()), 0);
   MESES_SEQ.slice(idxAtual, idxAtual + 30).forEach(k => {
     const o = document.createElement("option"); o.value=k; o.text=mesLabel(k);
-    if (k===atual) o.selected=true;
     mi.appendChild(o);
   });
+}
+
+// Sempre que a Data mudar (ou ao abrir a tela), o "Mês da 1ª Parcela" já vem
+// marcado no mês SEGUINTE ao da data lançada — ex: data em agosto -> parcela
+// inicial sugerida é setembro. O usuário ainda pode trocar manualmente depois.
+function atualizarMesIniPadrao() {
+  const dataVal = el("n-data").value;
+  const mesDaData = dataToMes(dataVal) || mesAtual();
+  const idx = mesIdx(mesDaData);
+  const seguinte = (idx >= 0 && idx+1 < MESES_SEQ.length) ? MESES_SEQ[idx+1] : mesDaData;
+  const alvo = mesIdx(seguinte) >= mesIdx(mesAtual()) ? seguinte : mesAtual();
+  el("n-mesini").value = alvo;
   updParc();
 }
 
@@ -2730,7 +2884,7 @@ function rNovoRecentes() {
   recentes.forEach(r => {
     const cl = r.cartao && r.cartao!==r.pgto ? r.cartao : (r.pgto||"—");
     const d = document.createElement("div");
-    d.className = "li"+(r.proj?" pj":"");
+    d.className = "li"+(ehProjecao(r)?" pj":"");
     d.innerHTML = `<div class="li-ico">${CE[r.cat]||"📦"}</div>
       <div class="li-body"><div class="li-desc">${escHtml(r.desc)}</div>
       <div class="li-meta">${escHtml(r.cat)} · ${escHtml(r.resp)} · ${escHtml(cl)} · ${mesLabel(r.mes)}</div></div>
@@ -3176,7 +3330,7 @@ function qlSuggest() {
   if (q.length < 2) { sug.innerHTML = ''; return; }
   const vistos = {};
   const matches = S.lancamentos
-    .filter(l => !l.proj && l.desc.toLowerCase().includes(q))
+    .filter(l => !ehProjecao(l) && l.desc.toLowerCase().includes(q))
     .filter(l => { if (vistos[l.desc]) return false; vistos[l.desc]=true; return true; })
     .slice(0,4);
   sug.innerHTML = matches.map(l =>
